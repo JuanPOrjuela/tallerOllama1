@@ -1,0 +1,93 @@
+==================================================================
+Ejercicio 7 - Almacenamiento de modelos
+Integrantes: Angel Arcos - Sebastian Coral - Juan Orjuela - Javier Rosero | 2026-09-24 16:50:37 | ubuntu-ollama
+==================================================================
+
+cloud@ubuntu-ollama:~$ df -h /
+S.ficheros     Tamaño Usados  Disp Uso% Montado en
+/dev/sda2         40G    15G   24G  38% /
+
+cloud@ubuntu-ollama:~$ ollama list
+NAME    ID    SIZE    MODIFIED 
+
+################ Modelo: gemma3:1b ################
+cloud@ubuntu-ollama:~$ df -h /
+S.ficheros     Tamaño Usados  Disp Uso% Montado en
+/dev/sda2         40G    15G   24G  39% /
+
+cloud@ubuntu-ollama:~$ time ollama pull gemma3:1b
+pulling manifest ⠋ pulling manifest ⠙ pulling manifest ⠹ pulling manifest ⠸ pulling manifest ⠼ pulling manifest ⠴ pulling manifest ⠦ pulling manifest ⠧ pulling manifest ⠇ pulling manifest ⠏ pulling manifest ⠋ pulling manifest ⠙ pulling manifest ⠹ pulling manifest ⠸ pulling manifest ⠼ pulling manifest ⠴ pulling manifest ⠦ pulling manifest ⠧ pulling manifest ⠇ pulling manifest 
+verifying sha256 digest ⠋ pulling manifest 
+verifying sha256 digest ⠙ pulling manifest 
+verifying sha256 digest ⠹ pulling manifest 
+verifying sha256 digest ⠸ pulling manifest 
+verifying sha256 digest ⠼ pulling manifest 
+verifying sha256 digest ⠴ pulling manifest 
+verifying sha256 digest ⠦ pulling manifest 
+verifying sha256 digest ⠇ pulling manifest 
+verifying sha256 digest ⠏ pulling manifest 
+verifying sha256 digest 
+writing manifest 
+success ⠋ pulling manifest 
+verifying sha256 digest 
+writing manifest 
+success 
+tiempo de descarga: 169 s
+
+cloud@ubuntu-ollama:~$ df -h /
+S.ficheros     Tamaño Usados  Disp Uso% Montado en
+/dev/sda2         40G    16G   23G  41% /
+
+################ Modelo: llama3.2:3b ################
+cloud@ubuntu-ollama:~$ df -h /
+S.ficheros     Tamaño Usados  Disp Uso% Montado en
+/dev/sda2         40G    16G   23G  41% /
+
+cloud@ubuntu-ollama:~$ time ollama pull llama3.2:3b
+pulling manifest ⠋ pulling manifest ⠹ pulling manifest ⠹ pulling manifest ⠸ pulling manifest ⠼ pulling manifest ⠦ pulling manifest ⠧ pulling manifest ⠧ pulling manifest ⠇ pulling manifest ⠋ pulling manifest 
+verifying sha256 digest ⠋ pulling manifest 
+verifying sha256 digest ⠙ pulling manifest 
+verifying sha256 digest ⠹ pulling manifest 
+verifying sha256 digest ⠼ pulling manifest 
+verifying sha256 digest ⠴ pulling manifest 
+verifying sha256 digest ⠦ pulling manifest 
+verifying sha256 digest ⠧ pulling manifest 
+verifying sha256 digest ⠇ pulling manifest 
+verifying sha256 digest ⠏ pulling manifest 
+verifying sha256 digest ⠙ pulling manifest 
+verifying sha256 digest ⠹ pulling manifest 
+verifying sha256 digest ⠸ pulling manifest 
+verifying sha256 digest ⠼ pulling manifest 
+verifying sha256 digest ⠴ pulling manifest 
+verifying sha256 digest ⠦ pulling manifest 
+verifying sha256 digest ⠧ pulling manifest 
+verifying sha256 digest ⠇ pulling manifest 
+verifying sha256 digest ⠏ pulling manifest 
+verifying sha256 digest ⠙ pulling manifest 
+verifying sha256 digest ⠹ pulling manifest 
+verifying sha256 digest ⠸ pulling manifest 
+verifying sha256 digest ⠴ pulling manifest 
+verifying sha256 digest ⠧ pulling manifest 
+verifying sha256 digest ⠇ pulling manifest 
+verifying sha256 digest ⠏ pulling manifest 
+verifying sha256 digest ⠋ pulling manifest 
+verifying sha256 digest ⠹ pulling manifest 
+verifying sha256 digest ⠸ pulling manifest 
+verifying sha256 digest 
+writing manifest 
+success ⠋ pulling manifest 
+verifying sha256 digest 
+writing manifest 
+success 
+tiempo de descarga: 432 s
+
+cloud@ubuntu-ollama:~$ df -h /
+S.ficheros     Tamaño Usados  Disp Uso% Montado en
+/dev/sda2         40G    18G   21G  46% /
+
+################ Modelo: qwen2.5:7b ################
+cloud@ubuntu-ollama:~$ df -h /
+S.ficheros     Tamaño Usados  Disp Uso% Montado en
+/dev/sda2         40G    18G   21G  46% /
+
+cloud@ubuntu-ollama:~$ time ollama pull qwen2.5:7b

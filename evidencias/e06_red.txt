@@ -1,0 +1,41 @@
+==================================================================
+Ejercicio 6 - Red y puerto de Ollama
+==================================================================
+
+cloud@ubuntu-ollama:~$ echo "Angel Arcos - Sebastian Coral - Juan Orjuela - Javier Rosero"
+Angel Arcos - Sebastian Coral - Juan Orjuela - Javier Rosero
+
+cloud@ubuntu-ollama:~$ date; hostname
+mié 07 oct 2026 13:23:53 -05
+ubuntu-ollama
+
+cloud@ubuntu-ollama:~$ sudo ss -lntp | grep 11434
+LISTEN 0      4096       127.0.0.1:11434      0.0.0.0:*    users:(("ollama",pid=3681,fd=3))                       
+
+cloud@ubuntu-ollama:~$ curl -s http://127.0.0.1:11434/api/tags
+{"models":[{"name":"asistente-temp10:latest","model":"asistente-temp10:latest","modified_at":"2026-09-24T21:32:15.318634571-05:00","size":2019393058,"digest":"69106e430c5c2422eafd36803be33dfa918dff08f194ca72fe65b4f18e626379","details":{"parent_model":"llama3.2:3b","format":"gguf","family":"llama","families":["llama"],"parameter_size":"3.2B","quantization_level":"Q4_K_M","context_length":131072,"embedding_length":3072},"capabilities":["completion","tools"]},{"name":"asistente-temp07:latest","model":"asistente-temp07:latest","modified_at":"2026-09-24T21:30:09.474119226-05:00","size":2019393060,"digest":"0b37b0e2565389c35abd3df61ee28ea1da974f15cd81230fb81e5eee494a8473","details":{"parent_model":"llama3.2:3b","format":"gguf","family":"llama","families":["llama"],"parameter_size":"3.2B","quantization_level":"Q4_K_M","context_length":131072,"embedding_length":3072},"capabilities":["completion","tools"]},{"name":"asistente-temp01:latest","model":"asistente-temp01:latest","modified_at":"2026-09-24T21:27:57.769996236-05:00","size":2019393060,"digest":"1f5292ec78ef3143f0f9028536d74cba4e370cf76a09a4b5bc11efab8ca533c7","details":{"parent_model":"llama3.2:3b","format":"gguf","family":"llama","families":["llama"],"parameter_size":"3.2B","quantization_level":"Q4_K_M","context_length":131072,"embedding_length":3072},"capabilities":["completion","tools"]},{"name":"asistente-ciberseguridad:latest","model":"asistente-ciberseguridad:latest","modified_at":"2026-09-24T21:25:06.202885112-05:00","size":2019393060,"digest":"b02d260b4f4d8b4ddff1d137986d786680cf431e5c099aabc92b1e8c29f7814a","details":{"parent_model":"llama3.2:3b","format":"gguf","family":"llama","families":["llama"],"parameter_size":"3.2B","quantization_level":"Q4_K_M","context_length":131072,"embedding_length":3072},"capabilities":["completion","tools"]},{"name":"qwen2.5:1.5b","model":"qwen2.5:1.5b","modified_at":"2026-09-24T21:25:04.189916695-05:00","size":986061892,"digest":"65ec06548149b04c096a120e4a6da9d4017ea809c91734ea5631e89f96ddc57b","details":{"parent_model":"","format":"gguf","family":"qwen2","families":["qwen2"],"parameter_size":"1.5B","quantization_level":"Q4_K_M","context_length":32768,"embedding_length":1536},"capabilities":["completion","tools"]},{"name":"llama3.2:3b","model":"llama3.2:3b","modified_at":"2026-09-24T17:00:38.629874656-05:00","size":2019393189,"digest":"a80c4f17acd55265feec403c7aef86be0c25983ab279d83f3bcd3abbcb5b8b72","details":{"parent_model":"","format":"gguf","family":"llama","families":["llama"],"parameter_size":"3.2B","quantization_level":"Q4_K_M","context_length":131072,"embedding_length":3072},"capabilities":["completion","tools"]},{"name":"gemma3:1b","model":"gemma3:1b","modified_at":"2026-09-24T16:53:26.187408158-05:00","size":815319791,"digest":"8648f39daa8fbf5b18c7b4e6a8fb4990c692751d49917417b8842ca5758e7ffc","details":{"parent_model":"","format":"gguf","family":"gemma3","families":["gemma3"],"parameter_size":"999.89M","quantization_level":"Q4_K_M","context_length":32768,"embedding_length":1152},"capabilities":["completion"]}]}
+cloud@ubuntu-ollama:~$ ip addr
+1: lo: <LOOPBACK,UP,LOWER_UP> mtu 65536 qdisc noqueue state UNKNOWN group default qlen 1000
+    link/loopback 00:00:00:00:00:00 brd 00:00:00:00:00:00
+    inet 127.0.0.1/8 scope host lo
+       valid_lft forever preferred_lft forever
+    inet6 ::1/128 scope host noprefixroute 
+       valid_lft forever preferred_lft forever
+2: enp0s3: <BROADCAST,MULTICAST,UP,LOWER_UP> mtu 1500 qdisc fq_codel state UP group default qlen 1000
+    link/ether 08:00:27:45:2f:90 brd ff:ff:ff:ff:ff:ff
+    inet 10.0.2.15/24 brd 10.0.2.255 scope global dynamic noprefixroute enp0s3
+       valid_lft 86137sec preferred_lft 86137sec
+    inet6 fd17:625c:f037:2:60d9:972c:17c0:2a3c/64 scope global temporary dynamic 
+       valid_lft 86143sec preferred_lft 14143sec
+    inet6 fd17:625c:f037:2:a00:27ff:fe45:2f90/64 scope global dynamic mngtmpaddr 
+       valid_lft 86143sec preferred_lft 14143sec
+    inet6 fe80::a00:27ff:fe45:2f90/64 scope link 
+       valid_lft forever preferred_lft forever
+
+## Prueba: la API NO responde por la IP de la interfaz (10.0.2.15), solo por loopback
+cloud@ubuntu-ollama:~$ curl -sS -m 3 http://10.0.2.15:11434/api/tags
+curl: (7) Failed to connect to 10.0.2.15 port 11434 after 0 ms: Couldn't connect to server
+
+cloud@ubuntu-ollama:~$ systemctl show ollama -p Environment
+Environment=PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/snap/bin OLLAMA_MAX_LOADED_MODELS=1 OLLAMA_NUM_PARALLEL=1
+

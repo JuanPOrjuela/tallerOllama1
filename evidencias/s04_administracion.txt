@@ -1,0 +1,198 @@
+==================================================================
+Seccion 04 - Administracion de Ollama en Ubuntu
+==================================================================
+
+cloud@ubuntu-ollama:~$ echo "Angel Arcos - Sebastian Coral - Juan Orjuela - Javier Rosero"
+Angel Arcos - Sebastian Coral - Juan Orjuela - Javier Rosero
+
+cloud@ubuntu-ollama:~$ date; hostname
+mié 07 oct 2026 13:20:47 -05
+ubuntu-ollama
+
+## Servicio
+cloud@ubuntu-ollama:~$ systemctl status ollama --no-pager
+● ollama.service - Ollama Service
+     Loaded: loaded (/etc/systemd/system/ollama.service; enabled; preset: enabled)
+    Drop-In: /etc/systemd/system/ollama.service.d
+             └─limites.conf
+     Active: active (running) since Wed 2026-10-07 13:19:23 -05; 1min 24s ago
+   Main PID: 1226 (ollama)
+      Tasks: 10 (limit: 5691)
+     Memory: 344.8M (peak: 365.5M)
+        CPU: 18.297s
+     CGroup: /system.slice/ollama.service
+             └─1226 /usr/local/bin/ollama serve
+
+oct 07 13:19:26 ubuntu-ollama ollama[1226]: time=2026-10-07T13:19:26.039-05:00 level=INFO source=images.go:922 msg="total blobs: 22"
+oct 07 13:19:26 ubuntu-ollama ollama[1226]: time=2026-10-07T13:19:26.043-05:00 level=INFO source=images.go:930 msg="total unused blobs removed: 0"
+oct 07 13:19:26 ubuntu-ollama ollama[1226]: time=2026-10-07T13:19:26.045-05:00 level=INFO source=routes.go:2065 msg="Listening on 127.0.0.1:11434 (version 0.34.4)"
+oct 07 13:19:26 ubuntu-ollama ollama[1226]: time=2026-10-07T13:19:26.220-05:00 level=INFO source=runner.go:60 msg="discovering available GPUs..."
+oct 07 13:19:27 ubuntu-ollama ollama[1226]: time=2026-10-07T13:19:27.220-05:00 level=INFO source=model_recommendations.go:177 msg="model recommendations cache sleep scheduled" wait=3h17m3.833399392s consecutive_failures=0
+oct 07 13:19:58 ubuntu-ollama ollama[1226]: time=2026-10-07T13:19:58.062-05:00 level=INFO source=types.go:50 msg="inference compute" id=cpu library=cpu compute="" name=cpu description=cpu libdirs=ollama driver="" pci_id="" type="" total="5.8 GiB" available="5.1 GiB"
+oct 07 13:19:58 ubuntu-ollama ollama[1226]: time=2026-10-07T13:19:58.063-05:00 level=INFO source=routes.go:2115 msg="vram-based default context" total_vram="0 B" default_num_ctx=4096
+oct 07 13:20:44 ubuntu-ollama ollama[1226]: [GIN] 2026/10/07 - 13:20:44 | 200 |     199.781µs |       127.0.0.1 | GET      "/api/version"
+oct 07 13:20:46 ubuntu-ollama ollama[1226]: [GIN] 2026/10/07 - 13:20:46 | 200 |   60.550183ms |       127.0.0.1 | GET      "/api/tags"
+oct 07 13:20:47 ubuntu-ollama ollama[1226]: [GIN] 2026/10/07 - 13:20:47 | 200 |      52.386µs |       127.0.0.1 | GET      "/api/version"
+
+cloud@ubuntu-ollama:~$ sudo systemctl restart ollama
+
+cloud@ubuntu-ollama:~$ systemctl status ollama --no-pager
+● ollama.service - Ollama Service
+     Loaded: loaded (/etc/systemd/system/ollama.service; enabled; preset: enabled)
+    Drop-In: /etc/systemd/system/ollama.service.d
+             └─limites.conf
+     Active: active (running) since Wed 2026-10-07 13:20:47 -05; 3s ago
+   Main PID: 2800 (ollama)
+      Tasks: 10 (limit: 5691)
+     Memory: 13.5M (peak: 35.5M)
+        CPU: 2.723s
+     CGroup: /system.slice/ollama.service
+             └─2800 /usr/local/bin/ollama serve
+
+oct 07 13:20:47 ubuntu-ollama systemd[1]: Started ollama.service - Ollama Service.
+oct 07 13:20:47 ubuntu-ollama ollama[2800]: time=2026-10-07T13:20:47.817-05:00 level=INFO source=routes.go:2005 msg="server config" env="map[CUDA_VISIBLE_DEVICES: GGML_VK_VISIBLE_DEVICES: GPU_DEVICE_ORDINAL: HIP_VISIBLE_DEVICES: HSA_OVERRIDE_GFX_VERSION: HTTPS_PROXY: HTTP_PROXY: LLAMA_ARG_FIT: LLAMA_ARG_FIT_TARGET: NO_PROXY: OLLAMA_CONTEXT_LENGTH:0 OLLAMA_CREATE_REMOTE:false OLLAMA_DEBUG:INFO OLLAMA_DEBUG_LOG_REQUESTS:false OLLAMA_EDITOR: OLLAMA_FLASH_ATTENTION:false OLLAMA_GO_TEMPLATE:true OLLAMA_GPU_OVERHEAD:0 OLLAMA_HOST:http://127.0.0.1:11434 OLLAMA_IGPU_ENABLE: OLLAMA_KEEP_ALIVE:5m0s OLLAMA_KV_CACHE_TYPE: OLLAMA_LLM_LIBRARY: OLLAMA_LOAD_TIMEOUT:5m0s OLLAMA_MAX_LOADED_MODELS:1 OLLAMA_MAX_QUEUE:512 OLLAMA_MAX_TRANSFER_STREAMS:4 OLLAMA_MODELS:/usr/share/ollama/.ollama/models OLLAMA_NOHISTORY:false OLLAMA_NOPRUNE:false OLLAMA_NO_CLOUD:false OLLAMA_NUM_PARALLEL:1 OLLAMA_ORIGINS:[http://localhost https://localhost http://localhost:* https://localhost:* http://127.0.0.1 https://127.0.0.1 http://127.0.0.1:* https://127.0.0.1:* http://0.0.0.0 https://0.0.0.0 http://0.0.0.0:* https://0.0.0.0:* app://* file://* tauri://* vscode-webview://* vscode-file://*] OLLAMA_REMOTES:[ollama.com] OLLAMA_SCHED_SPREAD:false OLLAMA_VULKAN:true ROCR_VISIBLE_DEVICES: http_proxy: https_proxy: no_proxy:]"
+oct 07 13:20:47 ubuntu-ollama ollama[2800]: time=2026-10-07T13:20:47.817-05:00 level=INFO source=routes.go:2007 msg="Ollama cloud disabled: false"
+oct 07 13:20:47 ubuntu-ollama ollama[2800]: time=2026-10-07T13:20:47.834-05:00 level=INFO source=images.go:922 msg="total blobs: 22"
+oct 07 13:20:47 ubuntu-ollama ollama[2800]: time=2026-10-07T13:20:47.839-05:00 level=INFO source=images.go:930 msg="total unused blobs removed: 0"
+oct 07 13:20:47 ubuntu-ollama ollama[2800]: time=2026-10-07T13:20:47.843-05:00 level=INFO source=routes.go:2065 msg="Listening on 127.0.0.1:11434 (version 0.34.4)"
+oct 07 13:20:47 ubuntu-ollama ollama[2800]: time=2026-10-07T13:20:47.847-05:00 level=INFO source=runner.go:60 msg="discovering available GPUs..."
+oct 07 13:20:48 ubuntu-ollama ollama[2800]: time=2026-10-07T13:20:48.712-05:00 level=INFO source=model_recommendations.go:177 msg="model recommendations cache sleep scheduled" wait=3h41m58.561617516s consecutive_failures=0
+oct 07 13:20:50 ubuntu-ollama ollama[2800]: time=2026-10-07T13:20:50.421-05:00 level=INFO source=types.go:50 msg="inference compute" id=cpu library=cpu compute="" name=cpu description=cpu libdirs=ollama driver="" pci_id="" type="" total="5.8 GiB" available="4.8 GiB"
+oct 07 13:20:50 ubuntu-ollama ollama[2800]: time=2026-10-07T13:20:50.421-05:00 level=INFO source=routes.go:2115 msg="vram-based default context" total_vram="0 B" default_num_ctx=4096
+
+cloud@ubuntu-ollama:~$ journalctl -u ollama -n 100 --no-pager
+sep 27 12:16:39 ubuntu-ollama ollama[1219]: slot launch_slot_: id  0 | task -1 | sampler chain: logits -> ?penalties -> ?dry -> ?top-n-sigma -> top-k -> ?typical -> top-p -> ?min-p -> ?xtc -> temp-ext -> dist
+sep 27 12:16:39 ubuntu-ollama ollama[1219]: slot launch_slot_: id  0 | task -1 | sampler params:
+sep 27 12:16:39 ubuntu-ollama ollama[1219]:         repeat_last_n = 64, repeat_penalty = 1.000, frequency_penalty = 0.000, presence_penalty = 0.000
+sep 27 12:16:39 ubuntu-ollama ollama[1219]:         dry_multiplier = 0.000, dry_base = 1.750, dry_allowed_length = 2, dry_penalty_last_n = 64
+sep 27 12:16:39 ubuntu-ollama ollama[1219]:         top_k = 40, top_p = 0.900, min_p = 0.000, xtc_probability = 0.000, xtc_threshold = 0.100, typical_p = 1.000, top_n_sigma = -1.000, temp = 0.300
+sep 27 12:16:39 ubuntu-ollama ollama[1219]:         mirostat = 0, mirostat_lr = 0.100, mirostat_ent = 5.000, adaptive_target = -1.000, adaptive_decay = 0.900
+sep 27 12:16:39 ubuntu-ollama ollama[1219]: slot launch_slot_: id  0 | task 0 | processing task, is_child = 0
+sep 27 12:16:39 ubuntu-ollama ollama[1219]: slot   operator(): id  0 | task 0 | new prompt, n_ctx_slot = 4096, n_keep = 4, task.n_tokens = 108
+sep 27 12:16:39 ubuntu-ollama ollama[1219]: slot   operator(): id  0 | task 0 | cached n_tokens = 0, memory_seq_rm [0, end)
+sep 27 12:16:39 ubuntu-ollama ollama[1219]: slot init_sampler: id  0 | task 0 | init sampler, took 0.67 ms, tokens: text = 108, total = 108
+sep 27 12:17:55 ubuntu-ollama ollama[1219]: slot print_timing: id  0 | task 0 | n_gen =    100, tg =   1.98 t/s, tg_3s =   2.00 t/s
+sep 27 12:17:59 ubuntu-ollama ollama[1219]: slot print_timing: id  0 | task 0 | n_gen =    106, tg =   1.97 t/s, tg_3s =   1.87 t/s
+sep 27 12:18:02 ubuntu-ollama ollama[1219]: slot print_timing: id  0 | task 0 | n_gen =    112, tg =   1.96 t/s, tg_3s =   1.82 t/s
+sep 27 12:18:05 ubuntu-ollama ollama[1219]: slot print_timing: id  0 | task 0 | n_gen =    119, tg =   1.97 t/s, tg_3s =   2.01 t/s
+sep 27 12:18:09 ubuntu-ollama ollama[1219]: slot print_timing: id  0 | task 0 | n_gen =    125, tg =   1.96 t/s, tg_3s =   1.89 t/s
+sep 27 12:18:12 ubuntu-ollama ollama[1219]: slot print_timing: id  0 | task 0 | n_gen =    131, tg =   1.96 t/s, tg_3s =   1.93 t/s
+sep 27 12:18:15 ubuntu-ollama ollama[1219]: slot print_timing: id  0 | task 0 | n_gen =    138, tg =   1.97 t/s, tg_3s =   2.07 t/s
+sep 27 12:18:18 ubuntu-ollama ollama[1219]: slot print_timing: id  0 | task 0 | n_gen =    145, tg =   1.97 t/s, tg_3s =   2.07 t/s
+sep 27 12:18:22 ubuntu-ollama ollama[1219]: slot print_timing: id  0 | task 0 | n_gen =    151, tg =   1.97 t/s, tg_3s =   1.82 t/s
+sep 27 12:18:25 ubuntu-ollama ollama[1219]: slot print_timing: id  0 | task 0 | n_gen =    158, tg =   1.97 t/s, tg_3s =   2.10 t/s
+sep 27 12:18:28 ubuntu-ollama ollama[1219]: slot print_timing: id  0 | task 0 | n_gen =    165, tg =   1.98 t/s, tg_3s =   2.16 t/s
+sep 27 12:18:32 ubuntu-ollama ollama[1219]: slot print_timing: id  0 | task 0 | n_gen =    172, tg =   1.98 t/s, tg_3s =   2.09 t/s
+sep 27 12:18:35 ubuntu-ollama ollama[1219]: slot print_timing: id  0 | task 0 | n_gen =    179, tg =   1.98 t/s, tg_3s =   2.03 t/s
+sep 27 12:18:38 ubuntu-ollama ollama[1219]: slot print_timing: id  0 | task 0 | n_gen =    186, tg =   1.99 t/s, tg_3s =   2.08 t/s
+sep 27 12:18:42 ubuntu-ollama ollama[1219]: slot print_timing: id  0 | task 0 | n_gen =    192, tg =   1.98 t/s, tg_3s =   1.84 t/s
+sep 27 12:18:45 ubuntu-ollama ollama[1219]: slot print_timing: id  0 | task 0 | n_gen =    197, tg =   1.97 t/s, tg_3s =   1.60 t/s
+sep 27 12:18:49 ubuntu-ollama ollama[1219]: slot print_timing: id  0 | task 0 | n_gen =    200, tg =   1.93 t/s, tg_3s =   0.82 t/s
+sep 27 12:18:52 ubuntu-ollama ollama[1219]: slot print_timing: id  0 | task 0 | n_gen =    204, tg =   1.90 t/s, tg_3s =   1.08 t/s
+sep 27 12:18:55 ubuntu-ollama ollama[1219]: slot print_timing: id  0 | task 0 | n_gen =    207, tg =   1.88 t/s, tg_3s =   0.98 t/s
+sep 27 12:18:58 ubuntu-ollama ollama[1219]: slot print_timing: id  0 | task 0 | n_gen =    213, tg =   1.88 t/s, tg_3s =   1.89 t/s
+sep 27 12:19:02 ubuntu-ollama ollama[1219]: slot print_timing: id  0 | task 0 | n_gen =    217, tg =   1.86 t/s, tg_3s =   1.19 t/s
+sep 27 12:19:06 ubuntu-ollama ollama[1219]: slot print_timing: id  0 | task 0 | n_gen =    220, tg =   1.82 t/s, tg_3s =   0.74 t/s
+sep 27 12:19:09 ubuntu-ollama ollama[1219]: [GIN] 2026/09/27 - 12:19:09 | 200 |    5.628006ms |       127.0.0.1 | HEAD     "/"
+sep 27 12:19:09 ubuntu-ollama ollama[1219]: [GIN] 2026/09/27 - 12:19:09 | 200 |   21.758048ms |       127.0.0.1 | GET      "/api/ps"
+sep 27 12:19:10 ubuntu-ollama ollama[1219]: slot print_timing: id  0 | task 0 | n_gen =    226, tg =   1.81 t/s, tg_3s =   1.52 t/s
+sep 27 12:19:13 ubuntu-ollama ollama[1219]: slot print_timing: id  0 | task 0 | n_gen =    230, tg =   1.80 t/s, tg_3s =   1.27 t/s
+sep 27 12:19:16 ubuntu-ollama ollama[1219]: slot print_timing: id  0 | task 0 | n_gen =    232, tg =   1.77 t/s, tg_3s =   0.61 t/s
+sep 27 12:19:21 ubuntu-ollama ollama[1219]: slot print_timing: id  0 | task 0 | n_gen =    235, tg =   1.73 t/s, tg_3s =   0.69 t/s
+sep 27 12:19:24 ubuntu-ollama ollama[1219]: slot print_timing: id  0 | task 0 | n_gen =    238, tg =   1.71 t/s, tg_3s =   0.87 t/s
+sep 27 12:19:27 ubuntu-ollama ollama[1219]: slot print_timing: id  0 | task 0 | n_gen =    242, tg =   1.70 t/s, tg_3s =   1.19 t/s
+sep 27 12:19:31 ubuntu-ollama ollama[1219]: slot print_timing: id  0 | task 0 | n_gen =    247, tg =   1.69 t/s, tg_3s =   1.47 t/s
+sep 27 12:19:34 ubuntu-ollama ollama[1219]: slot print_timing: id  0 | task 0 | n_gen =    252, tg =   1.69 t/s, tg_3s =   1.45 t/s
+sep 27 12:19:38 ubuntu-ollama ollama[1219]: slot print_timing: id  0 | task 0 | n_gen =    257, tg =   1.68 t/s, tg_3s =   1.34 t/s
+sep 27 12:19:41 ubuntu-ollama ollama[1219]: slot print_timing: id  0 | task 0 | n_gen =    262, tg =   1.67 t/s, tg_3s =   1.52 t/s
+sep 27 12:19:44 ubuntu-ollama ollama[1219]: slot print_timing: id  0 | task 0 | n_gen =    268, tg =   1.68 t/s, tg_3s =   1.91 t/s
+sep 27 12:19:48 ubuntu-ollama ollama[1219]: slot print_timing: id  0 | task 0 | n_gen =    273, tg =   1.68 t/s, tg_3s =   1.51 t/s
+sep 27 12:19:51 ubuntu-ollama ollama[1219]: slot print_timing: id  0 | task 0 | n_gen =    279, tg =   1.68 t/s, tg_3s =   1.70 t/s
+sep 27 12:19:54 ubuntu-ollama ollama[1219]: slot print_timing: id  0 | task 0 | n_gen =    283, tg =   1.67 t/s, tg_3s =   1.30 t/s
+sep 27 12:19:58 ubuntu-ollama ollama[1219]: slot print_timing: id  0 | task 0 | n_gen =    287, tg =   1.66 t/s, tg_3s =   1.23 t/s
+sep 27 12:20:01 ubuntu-ollama ollama[1219]: slot print_timing: id  0 | task 0 | n_gen =    292, tg =   1.66 t/s, tg_3s =   1.43 t/s
+sep 27 12:20:04 ubuntu-ollama ollama[1219]: slot print_timing: id  0 | task 0 | prompt eval time =   26173.01 ms /   108 tokens (  242.34 ms per token,     4.13 tokens per second)
+sep 27 12:20:04 ubuntu-ollama ollama[1219]: slot print_timing: id  0 | task 0 |        eval time =  178146.80 ms /   296 tokens (  603.89 ms per token,     1.66 tokens per second)
+sep 27 12:20:04 ubuntu-ollama ollama[1219]: slot print_timing: id  0 | task 0 |       total time =  204319.81 ms /   404 tokens
+sep 27 12:20:04 ubuntu-ollama ollama[1219]: slot print_timing: id  0 | task 0 |    graphs reused =        294
+sep 27 12:20:04 ubuntu-ollama ollama[1219]: slot      release: id  0 | task 0 | stop processing: n_tokens = 403, truncated = 0
+sep 27 12:20:04 ubuntu-ollama ollama[1219]: srv  update_slots: all slots are idle
+sep 27 12:20:04 ubuntu-ollama ollama[1219]: [GIN] 2026/09/27 - 12:20:04 | 200 |          6m5s |       127.0.0.1 | POST     "/api/generate"
+sep 27 12:20:05 ubuntu-ollama ollama[1219]: [GIN] 2026/09/27 - 12:20:05 | 200 |    3.296715ms |       127.0.0.1 | HEAD     "/"
+sep 27 12:20:06 ubuntu-ollama ollama[1219]: [GIN] 2026/09/27 - 12:20:06 | 200 |  990.657179ms |       127.0.0.1 | POST     "/api/show"
+sep 27 12:34:50 ubuntu-ollama systemd[1]: Stopping ollama.service - Ollama Service...
+sep 27 12:34:50 ubuntu-ollama systemd[1]: ollama.service: Deactivated successfully.
+sep 27 12:34:50 ubuntu-ollama systemd[1]: Stopped ollama.service - Ollama Service.
+sep 27 12:34:50 ubuntu-ollama systemd[1]: ollama.service: Consumed 13min 8.038s CPU time, 4.0G memory peak, 0B memory swap peak.
+-- Boot fe77048274a34a5e807f49789a5fcb25 --
+oct 01 16:17:11 ubuntu-ollama systemd[1]: Started ollama.service - Ollama Service.
+oct 01 16:17:11 ubuntu-ollama ollama[1170]: time=2026-10-01T16:17:11.814-05:00 level=INFO source=routes.go:2005 msg="server config" env="map[CUDA_VISIBLE_DEVICES: GGML_VK_VISIBLE_DEVICES: GPU_DEVICE_ORDINAL: HIP_VISIBLE_DEVICES: HSA_OVERRIDE_GFX_VERSION: HTTPS_PROXY: HTTP_PROXY: LLAMA_ARG_FIT: LLAMA_ARG_FIT_TARGET: NO_PROXY: OLLAMA_CONTEXT_LENGTH:0 OLLAMA_CREATE_REMOTE:false OLLAMA_DEBUG:INFO OLLAMA_DEBUG_LOG_REQUESTS:false OLLAMA_EDITOR: OLLAMA_FLASH_ATTENTION:false OLLAMA_GO_TEMPLATE:true OLLAMA_GPU_OVERHEAD:0 OLLAMA_HOST:http://127.0.0.1:11434 OLLAMA_IGPU_ENABLE: OLLAMA_KEEP_ALIVE:5m0s OLLAMA_KV_CACHE_TYPE: OLLAMA_LLM_LIBRARY: OLLAMA_LOAD_TIMEOUT:5m0s OLLAMA_MAX_LOADED_MODELS:1 OLLAMA_MAX_QUEUE:512 OLLAMA_MAX_TRANSFER_STREAMS:4 OLLAMA_MODELS:/usr/share/ollama/.ollama/models OLLAMA_NOHISTORY:false OLLAMA_NOPRUNE:false OLLAMA_NO_CLOUD:false OLLAMA_NUM_PARALLEL:1 OLLAMA_ORIGINS:[http://localhost https://localhost http://localhost:* https://localhost:* http://127.0.0.1 https://127.0.0.1 http://127.0.0.1:* https://127.0.0.1:* http://0.0.0.0 https://0.0.0.0 http://0.0.0.0:* https://0.0.0.0:* app://* file://* tauri://* vscode-webview://* vscode-file://*] OLLAMA_REMOTES:[ollama.com] OLLAMA_SCHED_SPREAD:false OLLAMA_VULKAN:true ROCR_VISIBLE_DEVICES: http_proxy: https_proxy: no_proxy:]"
+oct 01 16:17:11 ubuntu-ollama ollama[1170]: time=2026-10-01T16:17:11.814-05:00 level=INFO source=routes.go:2007 msg="Ollama cloud disabled: false"
+oct 01 16:17:11 ubuntu-ollama ollama[1170]: time=2026-10-01T16:17:11.829-05:00 level=INFO source=images.go:922 msg="total blobs: 22"
+oct 01 16:17:11 ubuntu-ollama ollama[1170]: time=2026-10-01T16:17:11.831-05:00 level=INFO source=images.go:930 msg="total unused blobs removed: 0"
+oct 01 16:17:11 ubuntu-ollama ollama[1170]: time=2026-10-01T16:17:11.832-05:00 level=INFO source=routes.go:2065 msg="Listening on 127.0.0.1:11434 (version 0.34.4)"
+oct 01 16:17:11 ubuntu-ollama ollama[1170]: time=2026-10-01T16:17:11.835-05:00 level=INFO source=runner.go:60 msg="discovering available GPUs..."
+oct 01 16:17:12 ubuntu-ollama ollama[1170]: time=2026-10-01T16:17:12.495-05:00 level=INFO source=model_recommendations.go:177 msg="model recommendations cache sleep scheduled" wait=4h42m37.200671324s consecutive_failures=0
+oct 01 16:17:14 ubuntu-ollama ollama[1170]: time=2026-10-01T16:17:14.649-05:00 level=INFO source=types.go:50 msg="inference compute" id=cpu library=cpu compute="" name=cpu description=cpu libdirs=ollama driver="" pci_id="" type="" total="5.8 GiB" available="5.2 GiB"
+oct 01 16:17:14 ubuntu-ollama ollama[1170]: time=2026-10-01T16:17:14.650-05:00 level=INFO source=routes.go:2115 msg="vram-based default context" total_vram="0 B" default_num_ctx=4096
+-- Boot e6f5557a046446cd817a64ce24092a22 --
+oct 07 13:19:23 ubuntu-ollama systemd[1]: Started ollama.service - Ollama Service.
+oct 07 13:19:25 ubuntu-ollama ollama[1226]: time=2026-10-07T13:19:25.949-05:00 level=INFO source=routes.go:2005 msg="server config" env="map[CUDA_VISIBLE_DEVICES: GGML_VK_VISIBLE_DEVICES: GPU_DEVICE_ORDINAL: HIP_VISIBLE_DEVICES: HSA_OVERRIDE_GFX_VERSION: HTTPS_PROXY: HTTP_PROXY: LLAMA_ARG_FIT: LLAMA_ARG_FIT_TARGET: NO_PROXY: OLLAMA_CONTEXT_LENGTH:0 OLLAMA_CREATE_REMOTE:false OLLAMA_DEBUG:INFO OLLAMA_DEBUG_LOG_REQUESTS:false OLLAMA_EDITOR: OLLAMA_FLASH_ATTENTION:false OLLAMA_GO_TEMPLATE:true OLLAMA_GPU_OVERHEAD:0 OLLAMA_HOST:http://127.0.0.1:11434 OLLAMA_IGPU_ENABLE: OLLAMA_KEEP_ALIVE:5m0s OLLAMA_KV_CACHE_TYPE: OLLAMA_LLM_LIBRARY: OLLAMA_LOAD_TIMEOUT:5m0s OLLAMA_MAX_LOADED_MODELS:1 OLLAMA_MAX_QUEUE:512 OLLAMA_MAX_TRANSFER_STREAMS:4 OLLAMA_MODELS:/usr/share/ollama/.ollama/models OLLAMA_NOHISTORY:false OLLAMA_NOPRUNE:false OLLAMA_NO_CLOUD:false OLLAMA_NUM_PARALLEL:1 OLLAMA_ORIGINS:[http://localhost https://localhost http://localhost:* https://localhost:* http://127.0.0.1 https://127.0.0.1 http://127.0.0.1:* https://127.0.0.1:* http://0.0.0.0 https://0.0.0.0 http://0.0.0.0:* https://0.0.0.0:* app://* file://* tauri://* vscode-webview://* vscode-file://*] OLLAMA_REMOTES:[ollama.com] OLLAMA_SCHED_SPREAD:false OLLAMA_VULKAN:true ROCR_VISIBLE_DEVICES: http_proxy: https_proxy: no_proxy:]"
+oct 07 13:19:25 ubuntu-ollama ollama[1226]: time=2026-10-07T13:19:25.953-05:00 level=INFO source=routes.go:2007 msg="Ollama cloud disabled: false"
+oct 07 13:19:26 ubuntu-ollama ollama[1226]: time=2026-10-07T13:19:26.039-05:00 level=INFO source=images.go:922 msg="total blobs: 22"
+oct 07 13:19:26 ubuntu-ollama ollama[1226]: time=2026-10-07T13:19:26.043-05:00 level=INFO source=images.go:930 msg="total unused blobs removed: 0"
+oct 07 13:19:26 ubuntu-ollama ollama[1226]: time=2026-10-07T13:19:26.045-05:00 level=INFO source=routes.go:2065 msg="Listening on 127.0.0.1:11434 (version 0.34.4)"
+oct 07 13:19:26 ubuntu-ollama ollama[1226]: time=2026-10-07T13:19:26.220-05:00 level=INFO source=runner.go:60 msg="discovering available GPUs..."
+oct 07 13:19:27 ubuntu-ollama ollama[1226]: time=2026-10-07T13:19:27.220-05:00 level=INFO source=model_recommendations.go:177 msg="model recommendations cache sleep scheduled" wait=3h17m3.833399392s consecutive_failures=0
+oct 07 13:19:58 ubuntu-ollama ollama[1226]: time=2026-10-07T13:19:58.062-05:00 level=INFO source=types.go:50 msg="inference compute" id=cpu library=cpu compute="" name=cpu description=cpu libdirs=ollama driver="" pci_id="" type="" total="5.8 GiB" available="5.1 GiB"
+oct 07 13:19:58 ubuntu-ollama ollama[1226]: time=2026-10-07T13:19:58.063-05:00 level=INFO source=routes.go:2115 msg="vram-based default context" total_vram="0 B" default_num_ctx=4096
+oct 07 13:20:44 ubuntu-ollama ollama[1226]: [GIN] 2026/10/07 - 13:20:44 | 200 |     199.781µs |       127.0.0.1 | GET      "/api/version"
+oct 07 13:20:46 ubuntu-ollama ollama[1226]: [GIN] 2026/10/07 - 13:20:46 | 200 |   60.550183ms |       127.0.0.1 | GET      "/api/tags"
+oct 07 13:20:47 ubuntu-ollama ollama[1226]: [GIN] 2026/10/07 - 13:20:47 | 200 |      52.386µs |       127.0.0.1 | GET      "/api/version"
+oct 07 13:20:47 ubuntu-ollama systemd[1]: Stopping ollama.service - Ollama Service...
+oct 07 13:20:47 ubuntu-ollama systemd[1]: ollama.service: Deactivated successfully.
+oct 07 13:20:47 ubuntu-ollama systemd[1]: Stopped ollama.service - Ollama Service.
+oct 07 13:20:47 ubuntu-ollama systemd[1]: ollama.service: Consumed 18.312s CPU time, 365.5M memory peak, 0B memory swap peak.
+oct 07 13:20:47 ubuntu-ollama systemd[1]: Started ollama.service - Ollama Service.
+oct 07 13:20:47 ubuntu-ollama ollama[2800]: time=2026-10-07T13:20:47.817-05:00 level=INFO source=routes.go:2005 msg="server config" env="map[CUDA_VISIBLE_DEVICES: GGML_VK_VISIBLE_DEVICES: GPU_DEVICE_ORDINAL: HIP_VISIBLE_DEVICES: HSA_OVERRIDE_GFX_VERSION: HTTPS_PROXY: HTTP_PROXY: LLAMA_ARG_FIT: LLAMA_ARG_FIT_TARGET: NO_PROXY: OLLAMA_CONTEXT_LENGTH:0 OLLAMA_CREATE_REMOTE:false OLLAMA_DEBUG:INFO OLLAMA_DEBUG_LOG_REQUESTS:false OLLAMA_EDITOR: OLLAMA_FLASH_ATTENTION:false OLLAMA_GO_TEMPLATE:true OLLAMA_GPU_OVERHEAD:0 OLLAMA_HOST:http://127.0.0.1:11434 OLLAMA_IGPU_ENABLE: OLLAMA_KEEP_ALIVE:5m0s OLLAMA_KV_CACHE_TYPE: OLLAMA_LLM_LIBRARY: OLLAMA_LOAD_TIMEOUT:5m0s OLLAMA_MAX_LOADED_MODELS:1 OLLAMA_MAX_QUEUE:512 OLLAMA_MAX_TRANSFER_STREAMS:4 OLLAMA_MODELS:/usr/share/ollama/.ollama/models OLLAMA_NOHISTORY:false OLLAMA_NOPRUNE:false OLLAMA_NO_CLOUD:false OLLAMA_NUM_PARALLEL:1 OLLAMA_ORIGINS:[http://localhost https://localhost http://localhost:* https://localhost:* http://127.0.0.1 https://127.0.0.1 http://127.0.0.1:* https://127.0.0.1:* http://0.0.0.0 https://0.0.0.0 http://0.0.0.0:* https://0.0.0.0:* app://* file://* tauri://* vscode-webview://* vscode-file://*] OLLAMA_REMOTES:[ollama.com] OLLAMA_SCHED_SPREAD:false OLLAMA_VULKAN:true ROCR_VISIBLE_DEVICES: http_proxy: https_proxy: no_proxy:]"
+oct 07 13:20:47 ubuntu-ollama ollama[2800]: time=2026-10-07T13:20:47.817-05:00 level=INFO source=routes.go:2007 msg="Ollama cloud disabled: false"
+oct 07 13:20:47 ubuntu-ollama ollama[2800]: time=2026-10-07T13:20:47.834-05:00 level=INFO source=images.go:922 msg="total blobs: 22"
+oct 07 13:20:47 ubuntu-ollama ollama[2800]: time=2026-10-07T13:20:47.839-05:00 level=INFO source=images.go:930 msg="total unused blobs removed: 0"
+oct 07 13:20:47 ubuntu-ollama ollama[2800]: time=2026-10-07T13:20:47.843-05:00 level=INFO source=routes.go:2065 msg="Listening on 127.0.0.1:11434 (version 0.34.4)"
+oct 07 13:20:47 ubuntu-ollama ollama[2800]: time=2026-10-07T13:20:47.847-05:00 level=INFO source=runner.go:60 msg="discovering available GPUs..."
+oct 07 13:20:48 ubuntu-ollama ollama[2800]: time=2026-10-07T13:20:48.712-05:00 level=INFO source=model_recommendations.go:177 msg="model recommendations cache sleep scheduled" wait=3h41m58.561617516s consecutive_failures=0
+oct 07 13:20:50 ubuntu-ollama ollama[2800]: time=2026-10-07T13:20:50.421-05:00 level=INFO source=types.go:50 msg="inference compute" id=cpu library=cpu compute="" name=cpu description=cpu libdirs=ollama driver="" pci_id="" type="" total="5.8 GiB" available="4.8 GiB"
+oct 07 13:20:50 ubuntu-ollama ollama[2800]: time=2026-10-07T13:20:50.421-05:00 level=INFO source=routes.go:2115 msg="vram-based default context" total_vram="0 B" default_num_ctx=4096
+
+## Puerto 11434
+cloud@ubuntu-ollama:~$ sudo ss -lntp | grep 11434
+LISTEN 0      4096       127.0.0.1:11434      0.0.0.0:*    users:(("ollama",pid=2800,fd=3))                       
+
+cloud@ubuntu-ollama:~$ curl -s http://127.0.0.1:11434/api/tags
+{"models":[{"name":"asistente-temp10:latest","model":"asistente-temp10:latest","modified_at":"2026-09-24T21:32:15.318634571-05:00","size":2019393058,"digest":"69106e430c5c2422eafd36803be33dfa918dff08f194ca72fe65b4f18e626379","details":{"parent_model":"llama3.2:3b","format":"gguf","family":"llama","families":["llama"],"parameter_size":"3.2B","quantization_level":"Q4_K_M","context_length":131072,"embedding_length":3072},"capabilities":["completion","tools"]},{"name":"asistente-temp07:latest","model":"asistente-temp07:latest","modified_at":"2026-09-24T21:30:09.474119226-05:00","size":2019393060,"digest":"0b37b0e2565389c35abd3df61ee28ea1da974f15cd81230fb81e5eee494a8473","details":{"parent_model":"llama3.2:3b","format":"gguf","family":"llama","families":["llama"],"parameter_size":"3.2B","quantization_level":"Q4_K_M","context_length":131072,"embedding_length":3072},"capabilities":["completion","tools"]},{"name":"asistente-temp01:latest","model":"asistente-temp01:latest","modified_at":"2026-09-24T21:27:57.769996236-05:00","size":2019393060,"digest":"1f5292ec78ef3143f0f9028536d74cba4e370cf76a09a4b5bc11efab8ca533c7","details":{"parent_model":"llama3.2:3b","format":"gguf","family":"llama","families":["llama"],"parameter_size":"3.2B","quantization_level":"Q4_K_M","context_length":131072,"embedding_length":3072},"capabilities":["completion","tools"]},{"name":"asistente-ciberseguridad:latest","model":"asistente-ciberseguridad:latest","modified_at":"2026-09-24T21:25:06.202885112-05:00","size":2019393060,"digest":"b02d260b4f4d8b4ddff1d137986d786680cf431e5c099aabc92b1e8c29f7814a","details":{"parent_model":"llama3.2:3b","format":"gguf","family":"llama","families":["llama"],"parameter_size":"3.2B","quantization_level":"Q4_K_M","context_length":131072,"embedding_length":3072},"capabilities":["completion","tools"]},{"name":"qwen2.5:1.5b","model":"qwen2.5:1.5b","modified_at":"2026-09-24T21:25:04.189916695-05:00","size":986061892,"digest":"65ec06548149b04c096a120e4a6da9d4017ea809c91734ea5631e89f96ddc57b","details":{"parent_model":"","format":"gguf","family":"qwen2","families":["qwen2"],"parameter_size":"1.5B","quantization_level":"Q4_K_M","context_length":32768,"embedding_length":1536},"capabilities":["completion","tools"]},{"name":"llama3.2:3b","model":"llama3.2:3b","modified_at":"2026-09-24T17:00:38.629874656-05:00","size":2019393189,"digest":"a80c4f17acd55265feec403c7aef86be0c25983ab279d83f3bcd3abbcb5b8b72","details":{"parent_model":"","format":"gguf","family":"llama","families":["llama"],"parameter_size":"3.2B","quantization_level":"Q4_K_M","context_length":131072,"embedding_length":3072},"capabilities":["completion","tools"]},{"name":"gemma3:1b","model":"gemma3:1b","modified_at":"2026-09-24T16:53:26.187408158-05:00","size":815319791,"digest":"8648f39daa8fbf5b18c7b4e6a8fb4990c692751d49917417b8842ca5758e7ffc","details":{"parent_model":"","format":"gguf","family":"gemma3","families":["gemma3"],"parameter_size":"999.89M","quantization_level":"Q4_K_M","context_length":32768,"embedding_length":1152},"capabilities":["completion"]}]}
+## Recursos (htop es interactivo: se usa top en modo batch como equivalente)
+cloud@ubuntu-ollama:~$ free -h
+               total       usado       libre  compartido   búf/caché  disponible
+Mem:           5,8Gi       981Mi       3,3Gi        26Mi       1,7Gi       4,8Gi
+Inter:         3,8Gi          0B       3,8Gi
+
+cloud@ubuntu-ollama:~$ top -b -n1 | head -15
+top - 13:20:52 up 2 min,  2 users,  load average: 5,82, 2,77, 1,04
+Tareas: 243 total,   3 ejecutar,  240 hibernar,    0 detener,    0 zombie
+%Cpu(s): 14,1 us, 14,1 sy,  0,0 ni, 62,0 id,  1,4 wa,  0,0 hi,  8,5 si,  0,0 st 
+MiB Mem :   5920,9 total,   3407,4 libre,    981,6 usado,   1785,3 búf/caché    
+MiB Intercambio:   3914,0 total,   3914,0 libre,      0,0 usado.   4939,3 dispon
+
+    PID USUARIO   PR  NI    VIRT    RES    SHR S  %CPU  %MEM     HORA+ ORDEN
+      1 root      20   0   23396  14828   9740 S   3,8   0,2   0:12.53 systemd
+     31 root      20   0       0      0      0 S   3,8   0,0   0:00.21 ksoftir+
+     42 root      20   0       0      0      0 I   3,8   0,0   0:01.22 kworker+
+    636 message+  20   0   12028   7036   4692 S   3,8   0,1   0:04.37 dbus-da+
+   2515 cloud     20   0 2939252  62732  48108 S   3,8   1,0   0:02.02 gjs
+   2875 cloud     20   0   12112   5920   3736 R   3,8   0,1   0:00.16 top
+      2 root      20   0       0      0      0 S   0,0   0,0   0:00.16 kthreadd
+      3 root      20   0       0      0      0 S   0,0   0,0   0:00.00 pool_wo+
+
+cloud@ubuntu-ollama:~$ nvidia-smi
+/home/cloud/taller-ollama/lib.sh: línea 2: nvidia-smi: orden no encontrada
+

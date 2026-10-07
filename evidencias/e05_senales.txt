@@ -1,0 +1,67 @@
+==================================================================
+Ejercicio 5 - Procesos, senales y servicios
+==================================================================
+
+cloud@ubuntu-ollama:~$ echo "Angel Arcos - Sebastian Coral - Juan Orjuela - Javier Rosero"
+Angel Arcos - Sebastian Coral - Juan Orjuela - Javier Rosero
+
+cloud@ubuntu-ollama:~$ date; hostname
+mié 07 oct 2026 13:23:53 -05
+ubuntu-ollama
+
+cloud@ubuntu-ollama:~$ pgrep -a ollama
+3681 /usr/local/bin/ollama serve
+
+cloud@ubuntu-ollama:~$ ps -fp 3681
+UID          PID    PPID  C STIME TTY          TIME CMD
+ollama      3681       1 15 13:23 ?        00:00:00 /usr/local/bin/ollama serve
+
+cloud@ubuntu-ollama:~$ ps -o pid,ppid,user,stat,etime,nlwp,rss,cmd -p 3681
+    PID    PPID USER     STAT     ELAPSED NLWP   RSS CMD
+   3681       1 ollama   Ssl        00:04   10 35812 /usr/local/bin/ollama serve
+
+cloud@ubuntu-ollama:~$ systemctl show ollama -p MainPID -p KillSignal -p KillMode -p Restart -p RestartUSec -p TimeoutStopUSec
+Restart=always
+RestartUSec=3s
+TimeoutStopUSec=1min 30s
+MainPID=3681
+KillMode=control-group
+KillSignal=15
+
+cloud@ubuntu-ollama:~$ cat /proc/3681/status | grep -E 'Name|State|PPid|Threads|VmRSS'
+Name:	ollama
+State:	S (sleeping)
+PPid:	1
+VmRSS:	   35812 kB
+Threads:	10
+
+cloud@ubuntu-ollama:~$ kill -l | head -4
+ 1) SIGHUP	 2) SIGINT	 3) SIGQUIT	 4) SIGILL	 5) SIGTRAP
+ 6) SIGABRT	 7) SIGBUS	 8) SIGFPE	 9) SIGKILL	10) SIGUSR1
+11) SIGSEGV	12) SIGUSR2	13) SIGPIPE	14) SIGALRM	15) SIGTERM
+16) SIGSTKFLT	17) SIGCHLD	18) SIGCONT	19) SIGSTOP	20) SIGTSTP
+
+cloud@ubuntu-ollama:~$ systemctl status ollama --no-pager
+● ollama.service - Ollama Service
+     Loaded: loaded (/etc/systemd/system/ollama.service; enabled; preset: enabled)
+    Drop-In: /etc/systemd/system/ollama.service.d
+             └─limites.conf
+     Active: active (running) since Wed 2026-10-07 13:23:49 -05; 4s ago
+   Main PID: 3681 (ollama)
+      Tasks: 10 (limit: 5691)
+     Memory: 12.6M (peak: 34.2M)
+        CPU: 2.235s
+     CGroup: /system.slice/ollama.service
+             └─3681 /usr/local/bin/ollama serve
+
+oct 07 13:23:49 ubuntu-ollama ollama[3681]: time=2026-10-07T13:23:49.775-05:00 level=INFO source=routes.go:2005 msg="server config" env="map[CUDA_VISIBLE_DEVICES: GGML_VK_VISIBLE_DEVICES: GPU_DEVICE_ORDINAL: HIP_VISIBLE_DEVICES: HSA_OVERRIDE_GFX_VERSION: HTTPS_PROXY: HTTP_PROXY: LLAMA_ARG_FIT: LLAMA_ARG_FIT_TARGET: NO_PROXY: OLLAMA_CONTEXT_LENGTH:0 OLLAMA_CREATE_REMOTE:false OLLAMA_DEBUG:INFO OLLAMA_DEBUG_LOG_REQUESTS:false OLLAMA_EDITOR: OLLAMA_FLASH_ATTENTION:false OLLAMA_GO_TEMPLATE:true OLLAMA_GPU_OVERHEAD:0 OLLAMA_HOST:http://127.0.0.1:11434 OLLAMA_IGPU_ENABLE: OLLAMA_KEEP_ALIVE:5m0s OLLAMA_KV_CACHE_TYPE: OLLAMA_LLM_LIBRARY: OLLAMA_LOAD_TIMEOUT:5m0s OLLAMA_MAX_LOADED_MODELS:1 OLLAMA_MAX_QUEUE:512 OLLAMA_MAX_TRANSFER_STREAMS:4 OLLAMA_MODELS:/usr/share/ollama/.ollama/models OLLAMA_NOHISTORY:false OLLAMA_NOPRUNE:false OLLAMA_NO_CLOUD:false OLLAMA_NUM_PARALLEL:1 OLLAMA_ORIGINS:[http://localhost https://localhost http://localhost:* https://localhost:* http://127.0.0.1 https://127.0.0.1 http://127.0.0.1:* https://127.0.0.1:* http://0.0.0.0 https://0.0.0.0 http://0.0.0.0:* https://0.0.0.0:* app://* file://* tauri://* vscode-webview://* vscode-file://*] OLLAMA_REMOTES:[ollama.com] OLLAMA_SCHED_SPREAD:false OLLAMA_VULKAN:true ROCR_VISIBLE_DEVICES: http_proxy: https_proxy: no_proxy:]"
+oct 07 13:23:49 ubuntu-ollama ollama[3681]: time=2026-10-07T13:23:49.777-05:00 level=INFO source=routes.go:2007 msg="Ollama cloud disabled: false"
+oct 07 13:23:49 ubuntu-ollama ollama[3681]: time=2026-10-07T13:23:49.781-05:00 level=INFO source=images.go:922 msg="total blobs: 22"
+oct 07 13:23:49 ubuntu-ollama ollama[3681]: time=2026-10-07T13:23:49.784-05:00 level=INFO source=images.go:930 msg="total unused blobs removed: 0"
+oct 07 13:23:49 ubuntu-ollama ollama[3681]: time=2026-10-07T13:23:49.788-05:00 level=INFO source=routes.go:2065 msg="Listening on 127.0.0.1:11434 (version 0.34.4)"
+oct 07 13:23:49 ubuntu-ollama ollama[3681]: time=2026-10-07T13:23:49.798-05:00 level=INFO source=runner.go:60 msg="discovering available GPUs..."
+oct 07 13:23:50 ubuntu-ollama ollama[3681]: time=2026-10-07T13:23:50.198-05:00 level=INFO source=model_recommendations.go:177 msg="model recommendations cache sleep scheduled" wait=4h2m18.17109797s consecutive_failures=0
+oct 07 13:23:51 ubuntu-ollama ollama[3681]: time=2026-10-07T13:23:51.338-05:00 level=INFO source=types.go:50 msg="inference compute" id=cpu library=cpu compute="" name=cpu description=cpu libdirs=ollama driver="" pci_id="" type="" total="5.8 GiB" available="4.8 GiB"
+oct 07 13:23:51 ubuntu-ollama ollama[3681]: time=2026-10-07T13:23:51.351-05:00 level=INFO source=routes.go:2115 msg="vram-based default context" total_vram="0 B" default_num_ctx=4096
+oct 07 13:23:53 ubuntu-ollama ollama[3681]: [GIN] 2026/10/07 - 13:23:53 | 200 |    22.05679ms |       127.0.0.1 | GET      "/api/tags"
+

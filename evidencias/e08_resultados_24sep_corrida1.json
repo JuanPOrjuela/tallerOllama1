@@ -1,0 +1,38 @@
+[
+  {
+    "modelo": "gemma3:1b",
+    "tamano": "815 MB",
+    "rss_runner_mb": 0,
+    "ram_usada_mb_antes": 1005,
+    "ram_usada_mb_despues": 1878,
+    "tiempo_total_s": 33.5,
+    "carga_s": 6.7,
+    "prompt_tokens": 41,
+    "tokens_generados": 192,
+    "tokens_por_s": 7.77
+  },
+  {
+    "modelo": "qwen2.5:1.5b",
+    "tamano": "986 MB",
+    "rss_runner_mb": 0,
+    "ram_usada_mb_antes": 1034,
+    "ram_usada_mb_despues": 2101,
+    "tiempo_total_s": 40.2,
+    "carga_s": 8.0,
+    "prompt_tokens": 62,
+    "tokens_generados": 168,
+    "tokens_por_s": 5.75
+  },
+  {
+    "modelo": "llama3.2:3b",
+    "tamano": "2.0 GB",
+    "rss_runner_mb": 0,
+    "ram_usada_mb_antes": 977,
+    "ram_usada_mb_despues": 3439,
+    "tiempo_total_s": 64.4,
+    "carga_s": 11.9,
+    "prompt_tokens": 56,
+    "tokens_generados": 146,
+    "tokens_por_s": 3.17
+  }
+]

@@ -1,0 +1,41 @@
+[
+  {
+    "modelo": "gemma3:1b",
+    "tamano": "815 MB",
+    "rss_runner_mb": 900,
+    "ollama_ps_size": "880 MB",
+    "ram_usada_mb_antes": 3820,
+    "ram_usada_mb_despues": 1891,
+    "tiempo_total_s": 12.4,
+    "carga_s": 3.0,
+    "prompt_tokens": 41,
+    "tokens_generados": 192,
+    "tokens_por_s": 22.56
+  },
+  {
+    "modelo": "qwen2.5:1.5b",
+    "tamano": "986 MB",
+    "rss_runner_mb": 1131,
+    "ollama_ps_size": "1.2 GB",
+    "ram_usada_mb_antes": 1013,
+    "ram_usada_mb_despues": 2128,
+    "tiempo_total_s": 11.3,
+    "carga_s": 3.1,
+    "prompt_tokens": 62,
+    "tokens_generados": 168,
+    "tokens_por_s": 24.37
+  },
+  {
+    "modelo": "llama3.2:3b",
+    "tamano": "2.0 GB",
+    "rss_runner_mb": 2470,
+    "ollama_ps_size": "2.6 GB",
+    "ram_usada_mb_antes": 1017,
+    "ram_usada_mb_despues": 3440,
+    "tiempo_total_s": 20.6,
+    "carga_s": 6.5,
+    "prompt_tokens": 56,
+    "tokens_generados": 146,
+    "tokens_por_s": 11.6
+  }
+]

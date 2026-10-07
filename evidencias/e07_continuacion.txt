@@ -1,0 +1,94 @@
+==================================================================
+Ejercicio 7 (continuacion) - tercer modelo y limpieza de la descarga interrumpida
+Integrantes: Angel Arcos - Sebastian Coral - Juan Orjuela - Javier Rosero | 2026-09-24 21:24:01 | ubuntu-ollama
+==================================================================
+
+La descarga de qwen2.5:7b (4.7 GB) se interrumpio dos veces al congelarse la VM (ver s02_vm_vs_anfitrion.txt).
+Ollama deja los fragmentos como archivos *-partial en el directorio de blobs:
+cloud@ubuntu-ollama:~$ sudo ls -lh /usr/share/ollama/.ollama/models/blobs | grep partial
+-rw-r--r-- 1 ollama ollama 4,4G sep 24 20:59 sha256-2bada8a7450677000f678be90653b85d364de7db25eb5ea54136ada5f3933730-partial
+-rw-r--r-- 1 ollama ollama   50 sep 24 17:00 sha256-2bada8a7450677000f678be90653b85d364de7db25eb5ea54136ada5f3933730-partial-0
+-rw-r--r-- 1 ollama ollama   58 sep 24 17:00 sha256-2bada8a7450677000f678be90653b85d364de7db25eb5ea54136ada5f3933730-partial-1
+-rw-r--r-- 1 ollama ollama   60 sep 24 17:00 sha256-2bada8a7450677000f678be90653b85d364de7db25eb5ea54136ada5f3933730-partial-10
+-rw-r--r-- 1 ollama ollama   60 sep 24 17:00 sha256-2bada8a7450677000f678be90653b85d364de7db25eb5ea54136ada5f3933730-partial-11
+-rw-r--r-- 1 ollama ollama   60 sep 24 17:00 sha256-2bada8a7450677000f678be90653b85d364de7db25eb5ea54136ada5f3933730-partial-12
+-rw-r--r-- 1 ollama ollama   60 sep 24 17:00 sha256-2bada8a7450677000f678be90653b85d364de7db25eb5ea54136ada5f3933730-partial-13
+-rw-r--r-- 1 ollama ollama   60 sep 24 17:00 sha256-2bada8a7450677000f678be90653b85d364de7db25eb5ea54136ada5f3933730-partial-14
+-rw-r--r-- 1 ollama ollama   60 sep 24 17:00 sha256-2bada8a7450677000f678be90653b85d364de7db25eb5ea54136ada5f3933730-partial-15
+-rw-r--r-- 1 ollama ollama   58 sep 24 17:00 sha256-2bada8a7450677000f678be90653b85d364de7db25eb5ea54136ada5f3933730-partial-2
+-rw-r--r-- 1 ollama ollama   58 sep 24 17:00 sha256-2bada8a7450677000f678be90653b85d364de7db25eb5ea54136ada5f3933730-partial-3
+-rw-r--r-- 1 ollama ollama   59 sep 24 17:00 sha256-2bada8a7450677000f678be90653b85d364de7db25eb5ea54136ada5f3933730-partial-4
+-rw-r--r-- 1 ollama ollama   59 sep 24 17:00 sha256-2bada8a7450677000f678be90653b85d364de7db25eb5ea54136ada5f3933730-partial-5
+-rw-r--r-- 1 ollama ollama   59 sep 24 17:00 sha256-2bada8a7450677000f678be90653b85d364de7db25eb5ea54136ada5f3933730-partial-6
+-rw-r--r-- 1 ollama ollama   59 sep 24 17:00 sha256-2bada8a7450677000f678be90653b85d364de7db25eb5ea54136ada5f3933730-partial-7
+-rw-r--r-- 1 ollama ollama   59 sep 24 17:00 sha256-2bada8a7450677000f678be90653b85d364de7db25eb5ea54136ada5f3933730-partial-8
+-rw-r--r-- 1 ollama ollama   59 sep 24 17:00 sha256-2bada8a7450677000f678be90653b85d364de7db25eb5ea54136ada5f3933730-partial-9
+
+cloud@ubuntu-ollama:~$ df -h /
+S.ficheros     Tamaño Usados  Disp Uso% Montado en
+/dev/sda2         40G    19G   20G  50% /
+
+cloud@ubuntu-ollama:~$ sudo rm /usr/share/ollama/.ollama/models/blobs/*-partial*
+
+cloud@ubuntu-ollama:~$ df -h /
+S.ficheros     Tamaño Usados  Disp Uso% Montado en
+/dev/sda2         40G    17G   21G  46% /
+
+Se reemplaza por un modelo de 1.5B que si es viable en esta VM:
+################ Modelo: qwen2.5:1.5b ################
+cloud@ubuntu-ollama:~$ df -h /
+S.ficheros     Tamaño Usados  Disp Uso% Montado en
+/dev/sda2         40G    17G   21G  46% /
+
+cloud@ubuntu-ollama:~$ time ollama pull qwen2.5:1.5b
+pulling manifest ⠋ pulling manifest ⠙ pulling manifest ⠹ pulling manifest ⠸ pulling manifest ⠼ pulling manifest ⠴ pulling manifest ⠦ pulling manifest ⠧ pulling manifest ⠇ pulling manifest ⠏ pulling manifest 
+verifying sha256 digest ⠋ pulling manifest 
+verifying sha256 digest ⠙ pulling manifest 
+verifying sha256 digest ⠹ pulling manifest 
+verifying sha256 digest ⠸ pulling manifest 
+verifying sha256 digest ⠼ pulling manifest 
+verifying sha256 digest ⠴ pulling manifest 
+verifying sha256 digest ⠦ pulling manifest 
+verifying sha256 digest ⠧ pulling manifest 
+verifying sha256 digest ⠇ pulling manifest 
+verifying sha256 digest ⠏ pulling manifest 
+verifying sha256 digest ⠋ pulling manifest 
+verifying sha256 digest ⠙ pulling manifest 
+verifying sha256 digest ⠹ pulling manifest 
+verifying sha256 digest ⠸ pulling manifest 
+verifying sha256 digest ⠼ pulling manifest 
+verifying sha256 digest ⠴ pulling manifest 
+verifying sha256 digest ⠦ pulling manifest 
+verifying sha256 digest 
+writing manifest 
+success 
+tiempo de descarga: 63 s
+
+cloud@ubuntu-ollama:~$ df -h /
+S.ficheros     Tamaño Usados  Disp Uso% Montado en
+/dev/sda2         40G    18G   20G  48% /
+
+cloud@ubuntu-ollama:~$ ollama list
+NAME                               ID              SIZE      MODIFIED               
+qwen2.5:1.5b                       65ec06548149    986 MB    Less than a second ago    
+asistente-ciberseguridad:latest    8a7b09105598    2.0 GB    25 minutes ago            
+llama3.2:3b                        a80c4f17acd5    2.0 GB    4 hours ago               
+gemma3:1b                          8648f39daa8f    815 MB    5 hours ago               
+
+cloud@ubuntu-ollama:~$ sudo du -sh /usr/share/ollama/.ollama/models
+3,6G	/usr/share/ollama/.ollama/models
+
+cloud@ubuntu-ollama:~$ sudo ls -lhS /usr/share/ollama/.ollama/models/blobs | head
+total 3,6G
+-rw-r--r-- 1 ollama ollama 1,9G sep 24 20:59 sha256-dde5aa3fc5ffc17176b5e8bdc82f587b24b2678c6c66101bf7da77af9f7ccdff
+-rw-r--r-- 1 ollama ollama 941M sep 24 21:25 sha256-183715c435899236895da3869489cc30ac241476b4971a20285b1a462818a5b4
+-rw-r--r-- 1 ollama ollama 778M sep 24 16:53 sha256-7cd4618c1faf8b7233c6c906dac1694b6a47684b37b8895d470ac688520b9c01
+-rw-r--r-- 1 ollama ollama  12K sep 24 21:25 sha256-832dd9e00a68dd83b3c3fb9f5588dad7dcf337a0db50f7d9483f310cd292e92e
+-rw-r--r-- 1 ollama ollama 8,3K sep 24 16:53 sha256-dd084c7d92a3c1c14cc09ae77153b903fd2024b64a100a0cc8ec9316063d2dbc
+-rw-r--r-- 1 ollama ollama 7,6K sep 24 20:59 sha256-fcc5a6bec9daf9b561a68827b67ab6088e1dba9d1fa2a50d7bbcc8384e0a265d
+-rw-r--r-- 1 ollama ollama 5,9K sep 24 20:59 sha256-a70ff7e570d97baaf4e62ac6e6ad9975e04caa6d900d3742d37698494479e0cd
+-rw-r--r-- 1 ollama ollama 1,5K sep 24 21:25 sha256-eb4402837c7829a690fa845de4d7f3fd842c2adee476d5341da8a46ea9255175
+-rw-r--r-- 1 ollama ollama 1,4K sep 24 20:59 sha256-966de95ca8a62200913e3f8bfbf84c8494536f1b94b49166851e76644e966396
+
+Nota: asistente-ciberseguridad aparece con 2.0 GB pero reutiliza el blob de pesos de llama3.2:3b
+(mismo sha256); solo agrega capas pequenas de parametros y prompt de sistema.

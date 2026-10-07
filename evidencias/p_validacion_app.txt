@@ -1,0 +1,22 @@
+==================================================================
+Proyecto final - Validacion de la respuesta de la app (comando sugerido por el modelo)
+Integrantes: Angel Arcos - Sebastian Coral - Juan Orjuela - Javier Rosero | 2026-09-24 22:01:38 | ubuntu-ollama
+==================================================================
+
+El modelo sugirio: grep -c 'Invalid user' /var/log/authlog | awk '{print $1}' | sort -u | grep -v 0
+
+cloud@ubuntu-ollama:~$ ls -l /var/log/authlog
+ls: no se puede acceder a '/var/log/authlog': No existe el archivo o el directorio
+
+cloud@ubuntu-ollama:~$ ls -l /var/log/auth.log
+-rw-r----- 1 syslog adm 403486 sep 24 22:01 /var/log/auth.log
+
+Problemas: (1) el archivo es auth.log, no authlog; (2) grep -c devuelve UN numero total, asi que awk/sort no pueden agrupar por IP.
+
+Comando correcto (Ubuntu 24.04, sshd registra en el journal de ssh.service y en /var/log/auth.log):
+cloud@ubuntu-ollama:~$ sudo journalctl -u ssh --no-pager | grep -E "Failed password|Invalid user" | grep -oE "from [0-9.]+" | sort | uniq -c | sort -rn
+(sin salida: en este laboratorio no hubo intentos fallidos; todos los accesos fueron con llave)
+
+cloud@ubuntu-ollama:~$ sudo journalctl -u ssh --no-pager | grep -E "Accepted (publickey|password)" | awk "{print \, \1}" | sort | uniq -c
+    338 cloud 10.0.2.2
+      2 estudiante 192.168.56.1
