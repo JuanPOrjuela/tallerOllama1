@@ -9,14 +9,12 @@ y armamos un asistente de ciberseguridad que corre local (AsistenteIA-VM).
 
 ## Contenido
 
-- `Informe_Taller_Ollama_VM.pdf`: el informe con el análisis de cada ejercicio (también está el .html).
-- `codigo/scripts/`: un script por ejercicio. Cada uno genera el archivo del mismo nombre en `evidencias/`.
+- `Informe_Taller_Ollama_VM.pdf`: el informe con cada punto de la guía, las salidas y las capturas de la VM.
 - `codigo/AsistenteIA-VM/`: la interfaz web (index.html), el Modelfile del asistente y `servir.sh`.
+- `codigo/scripts/`: un script por ejercicio (e01 a e10, s02 a s12), el benchmark (`bench.py`), el experimento de temperatura y los scripts de las capturas.
 - `codigo/reporte_sistema.sh`: script del ejercicio 9.
-- `evidencias/`: salida de terminal de cada ejercicio, resultados del benchmark (.json) y la captura `captura_ssh.pcapng` del reto de red.
-- `capturas/`: pantallazos de la VM.
 
-Todas las salidas empiezan con:
+Las salidas de terminal y las capturas empiezan con:
 
 ```
 cloud@ubuntu-ollama:~$ echo "Angel Arcos - Sebastian Coral - Juan Orjuela - Javier Rosero"
@@ -32,7 +30,7 @@ ollama create asistente-ciberseguridad -f Modelfile
 ./servir.sh        # y abrir http://localhost:8080 en Firefox dentro de la VM
 ```
 
-Para regenerar las evidencias: `bash codigo/rehacer.sh` (los scripts esperan estar en `~/taller-ollama`).
+Los scripts de `codigo/scripts/` esperan estar en `~/taller-ollama`; `bash codigo/rehacer.sh` los corre todos en orden.
 
 ## Notas
 

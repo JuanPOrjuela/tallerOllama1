@@ -20,9 +20,8 @@ Asistente de ciberseguridad que corre 100 % local dentro de una máquina virtual
 | `Modelfile` | Modelo base, `temperature 0.3`, `num_ctx 4096` y prompt de sistema de ciberseguridad |
 | `index.html` | Interfaz web: consulta con `/api/chat` en streaming, historial de conversación, selector de modelo, tiempos y tokens/s, manejo de errores y límite por inactividad |
 | `servir.sh` | Sirve la interfaz en `http://localhost:8080` (no `file://`) |
-| `../scripts/` | Scripts que generan cada evidencia (`e01`…`e10`, `s02`…`s12`, `bench.py`, `temperaturas.py`) |
+| `../scripts/` | Un script por ejercicio (`e01`…`e10`, `s02`…`s12`, `bench.py`, `temperaturas.py`) |
 | `../reporte_sistema.sh` | Ejercicio 9 |
-| `../evidencias/` | Salida de cada ejercicio (`.txt`), resultados del benchmark (`.json`) y captura `captura_ssh.pcapng` |
 
 ## Uso
 
@@ -43,7 +42,7 @@ ollama create asistente-ciberseguridad -f Modelfile
 - La interfaz también se sirve solo en `127.0.0.1:8080`.
 - Override de systemd `limites.conf`: `OLLAMA_MAX_LOADED_MODELS=1`, `OLLAMA_NUM_PARALLEL=1` para que la carga no congele la VM.
 - No se envían credenciales ni datos personales al modelo; la captura de red es tráfico SSH propio del laboratorio.
-- Las respuestas del modelo se contrastan con la salida real de los comandos (Ejercicio 10 y Reto).
+- Las respuestas del modelo se contrastan con la salida real de los comandos (Ejercicio 10 y Reto, ver el informe).
 
 ## Limitaciones
 
