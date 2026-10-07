@@ -9,9 +9,9 @@ y armamos un asistente de ciberseguridad que corre local (AsistenteIA-VM).
 
 ## Contenido
 
-- `Informe_Taller_Ollama_VM.pdf`: el informe con cada punto de la guía, las salidas y las capturas de la VM.
+- `Informe_Taller_Ollama_VM.pdf`: el informe. Empieza con la parte teórica (qué es la IA, IA local frente a la nube, modelos viables y tipos de IA local) y después sigue cada punto de la guía con sus salidas y capturas de la VM.
 - `codigo/AsistenteIA-VM/`: la interfaz web (index.html), el Modelfile del asistente y `servir.sh`.
-- `codigo/scripts/`: un script por ejercicio (e01 a e10, s02 a s12), el benchmark (`bench.py`), el experimento de temperatura y los scripts de las capturas.
+- `codigo/scripts/`: un script por ejercicio (e01 a e10, s02 a s12), el benchmark (`bench.py`), el experimento de temperatura, la prueba de la API desde PowerShell (`s08_powershell.ps1`) y los scripts de las capturas.
 - `codigo/reporte_sistema.sh`: script del ejercicio 9.
 
 Las salidas de terminal y las capturas empiezan con:
