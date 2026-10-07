@@ -1,0 +1,270 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<title>Informe Taller Ollama VM</title>
+<style>
+  @page { size: Letter; margin: 22mm 20mm; }
+  * { box-sizing: border-box; }
+  body { font: 10.5pt/1.55 "Segoe UI", system-ui, sans-serif; color: #1c1c1c; margin: 0; background: #fff; }
+  main { max-width: 180mm; margin: 0 auto; }
+  h1 { font-size: 19pt; font-weight: 600; margin: 0 0 6px; }
+  h2 { font-size: 13pt; font-weight: 600; margin: 26px 0 8px; break-after: avoid; }
+  h3 { font-size: 11pt; font-weight: 600; margin: 16px 0 6px; break-after: avoid; }
+  p { margin: 6px 0; text-align: justify; }
+  .portada { padding: 45mm 0 10mm; break-after: page; }
+  .portada .sub { font-size: 12pt; color: #555; margin-bottom: 22mm; }
+  .portada table { border: 0; width: auto; }
+  .portada td { padding: 3px 18px 3px 0; border: 0; }
+  table { border-collapse: collapse; width: 100%; margin: 10px 0; font-size: 9.5pt; break-inside: avoid; border-top: 1px solid #333; border-bottom: 1px solid #333; }
+  th { font-weight: 600; text-align: left; border-bottom: 0.6px solid #333; padding: 4px 8px 4px 0; vertical-align: bottom; }
+  td { padding: 3px 8px 3px 0; text-align: left; vertical-align: top; }
+  td.n, th.n { text-align: right; font-variant-numeric: tabular-nums; }
+  pre { font: 8.4pt/1.45 Consolas, "Cascadia Mono", monospace; white-space: pre-wrap; word-break: break-word; break-inside: avoid; margin: 8px 0 8px 12px; padding: 0; }
+  code { font: 9pt Consolas, monospace; }
+  figure { margin: 12px 0; break-inside: avoid; }
+  figure img { width: 100%; border: 0.5px solid #bbb; }
+  figcaption { font-size: 9pt; color: #555; margin-top: 4px; }
+  .ev { font-size: 8.5pt; color: #666; }
+  ul, ol { margin: 4px 0 6px 20px; padding: 0; }
+  li { margin: 2px 0; }
+</style>
+</head>
+<body>
+<main>
+
+<section class="portada">
+  <h1>Implementación de una IA local en una máquina virtual Ubuntu</h1>
+  <div class="sub">Taller de Sistemas Operativos · Laboratorio Ubuntu VM + Ollama<br>Proyecto final: AsistenteIA-VM</div>
+  <table>
+    <tr><td><b>Integrantes</b></td><td>Angel Arcos<br>Sebastian Coral<br>Juan Orjuela<br>Javier Rosero</td></tr>
+    <tr><td><b>Docente</b></td><td>Mg. Iván Darío Méndez Aguilera</td></tr>
+    <tr><td><b>Fecha</b></td><td>7 de octubre de 2026</td></tr>
+    <tr><td><b>Entorno</b></td><td>VirtualBox 7.2.16 · Ubuntu 24.04.5 LTS · Ollama 0.34.4</td></tr>
+  </table>
+  <p style="margin-top:18mm" class="ev">Todas las salidas citadas están completas en la carpeta <code>evidencias/</code>; cada archivo lleva el nombre del ejercicio (p. ej. <code>e03_procesos.txt</code>) y fue generado por el script del mismo nombre en <code>codigo/scripts/</code>. Cada salida empieza con <code>echo "Angel Arcos - Sebastian Coral - Juan Orjuela - Javier Rosero"</code> seguido de <code>date</code> y <code>hostname</code>, ejecutados en la terminal de la VM. Las evidencias se volvieron a generar el 7 de octubre con ese encabezado. Las que no se podían repetir sin reinstalar o volver a descargar modelos (instalación <code>03_*</code>, <code>00_linea_base</code>, <code>e07_*</code>, <code>s04_diagnostico</code>, <code>s04_override</code>, <code>p_validacion_app</code> y las corridas del benchmark del 24 de septiembre) se dejaron como estaban, con el rótulo de los integrantes. Las capturas de pantalla de la VM están en <code>capturas/</code>.</p>
+</section>
+
+<h2>1. Hardware y máquina virtual</h2>
+<table>
+  <tr><th></th><th>Anfitrión</th><th>VM Ubuntu-Ollama</th></tr>
+  <tr><td>Sistema</td><td>Windows 11 Home</td><td>Ubuntu 24.04.5 LTS, kernel 7.0.0-34-generic</td></tr>
+  <tr><td>CPU</td><td>Intel Core i9-12900H, 14 núcleos / 20 hilos</td><td>4 vCPU (20 % de los hilos)</td></tr>
+  <tr><td>RAM</td><td>16 GB</td><td>6 GB (se empezó con 8 GB, ver 1.2) + 3,8 GB de swap</td></tr>
+  <tr><td>Disco</td><td>SSD, ~450 GB libres</td><td>VDI dinámico de 40 GB (ampliado desde 25 GB)</td></tr>
+  <tr><td>GPU</td><td>NVIDIA RTX 3070 Ti Laptop</td><td>ninguna: VirtualBox no hace passthrough → Ollama en modo CPU</td></tr>
+  <tr><td>Red</td><td>—</td><td>NAT; reenvío 127.0.0.1:2222 → 22 solo para administrar por SSH</td></tr>
+</table>
+<p>La VM se obtuvo clonando una Ubuntu existente del curso (<code>VBoxManage clonevm</code>) para no tocar la original. El disco se amplió con <code>VBoxManage modifymedium --resize 40960</code> y dentro de Ubuntu con <code>growpart /dev/sda 2</code> + <code>resize2fs /dev/sda2</code>. Antes de instalar Ollama se tomó el snapshot <b>antes-de-ollama</b>, y al final <b>taller-completo</b>. <code>lscpu</code> reporta <i>Fabricante del hipervisor: KVM</i> y <i>Tipo de virtualización: lleno</i>, porque VirtualBox expone la interfaz paravirtualizada tipo KVM. <span class="ev">(s02_preparacion_vm.txt, e01_identificacion.txt)</span></p>
+
+<h3>1.1 Ejercicio 1: identificación del sistema</h3>
+<table>
+  <tr><th>Versión</th><th>Kernel</th><th>Arquitectura</th><th>vCPU</th><th>RAM</th><th>Disco raíz</th></tr>
+  <tr><td>Ubuntu 24.04.5 LTS (noble)</td><td>7.0.0-34-generic</td><td>x86_64</td><td>4</td><td>5,8 GiB</td><td>/dev/sda2 40 G, 49 % usado</td></tr>
+</table>
+<p>El kernel pasó de 7.0.0-31 a 7.0.0-34: el <code>apt upgrade</code> del paso 1 instaló un kernel nuevo, que solo quedó activo tras reiniciar la VM.</p>
+
+<h3>1.2 Actividad: recursos asignados vs. anfitrión (lo que pasó al asignar demasiado)</h3>
+<p>Con 8 GB (la mitad de la RAM física) y el anfitrión usando además navegador y editores, la VM <b>se congeló</b> durante la primera inferencia: el reloj del escritorio se detuvo, SSH respondía <code>Connection timed out during banner exchange</code> y el botón ACPI se ignoraba. En ese momento Windows tenía <b>0,86 GB libres</b> y el proceso <code>VirtualBoxVM</code> solo <b>4,4 GB en RAM física</b> de los 8 GB asignados. El log de VirtualBox decía <code>Guest seems to be unresponsive</code>.</p>
+<p>La RAM de una VM no se reserva: es memoria virtual del proceso VirtualBoxVM. Si el anfitrión no la tiene, Windows pagina a disco parte de la "RAM" del invitado. Ubuntu cree tener 8 GB, pero cada acceso a esas páginas es un fallo de página en el anfitrión y el invitado entra en <i>thrashing</i>, justo cuando Ollama recorre todos los pesos del modelo para generar cada token. Con demasiadas vCPU pasa algo análogo: el anfitrión no puede planificarlas todas a la vez y el invitado acumula latencia (<i>steal time</i>). Se bajó la VM a 6 GB. <span class="ev">(s02_vm_vs_anfitrion.txt)</span></p>
+
+<h2>2. Instalación y verificación (sección 03)</h2>
+<ol>
+  <li><code>sudo apt update && sudo apt upgrade -y</code>: se actualizaron todos los paquetes, incluido el kernel.</li>
+  <li><code>sudo apt install -y curl wget git pciutils lshw htop net-tools</code></li>
+  <li><code>curl -fsSL https://ollama.com/install.sh | sh</code>: el instalador crea el usuario de sistema <code>ollama</code>, lo agrega a los grupos <code>render</code> y <code>video</code>, instala la unidad <code>ollama.service</code> y termina con <i>WARNING: No NVIDIA/AMD GPU detected. Ollama will run in CPU-only mode.</i></li>
+  <li><code>ollama -v</code> → <b>0.34.4</b>; <code>which ollama</code> → <code>/usr/local/bin/ollama</code></li>
+  <li>a 7. <code>systemctl status ollama</code> → <span>active (running), enabled</span>; <code>curl http://127.0.0.1:11434/api/tags</code> → <code>{"models":[]}</code></li>
+</ol>
+<figure><img src="capturas/cap_01_terminal_servicio.png" alt="Terminal de Ubuntu con el estado del servicio ollama"><figcaption>Captura 1. Terminal de la VM: echo con los integrantes, fecha, versión de Ollama, servicio con el drop-in <code>limites.conf</code>, cgroup con <code>ollama serve</code> y el proceso hijo <code>llama-server</code>, puertos en escucha (11434 de Ollama y 8080 de la interfaz, ambos solo en 127.0.0.1) y modelos locales.</figcaption></figure>
+
+<h2>3. Administración de Ollama y un problema real de SO (sección 04)</h2>
+<p>Se revisaron servicio, puerto, logs y recursos (<code>systemctl</code>, <code>journalctl -u ollama</code>, <code>ss -lntp</code>, <code>free -h</code>). <code>nvidia-smi</code> no existe en la VM, lo cual es coherente con la ausencia de GPU. <span class="ev">(s04_administracion.txt)</span></p>
+
+<h3>3.1 Diagnóstico: la VM se congelaba en cada inferencia</h3>
+<p>Incluso con 6 GB, cualquier modelo (también gemma3:1b, de 815 MB) volvía a congelar la VM. El log de VirtualBox mostró la causa de fondo:</p>
+<pre>HM: HMR3Init: Attempting fall back to NEM: VT-x is not available
+NEM:  info: Found optional import WinHvPlatform.dll!...</pre>
+<p>Windows 11 tiene activo su hipervisor (Hyper-V / seguridad basada en virtualización), que toma VT-x. VirtualBox queda como cliente de la API de Hyper-V (modo NEM), que es más lento y tiene problemas conocidos cuando todas las vCPU ejecutan código AVX2 intensivo, justo lo que hace ggml al multiplicar matrices. Para aislar la variable probamos la misma consulta variando los hilos de inferencia:</p>
+<table>
+  <tr><th class="n">num_thread</th><th>Resultado</th><th class="n">Generación</th></tr>
+  <tr><td class="n">1</td><td>responde</td><td class="n">5,9 tok/s</td></tr>
+  <tr><td class="n">2</td><td>responde</td><td class="n">7,2 tok/s</td></tr>
+  <tr><td class="n">3</td><td>responde</td><td class="n">10,7 tok/s</td></tr>
+  <tr><td class="n">4 (por defecto)</td><td>la VM se congela (3 de 3 veces)</td><td class="n">—</td></tr>
+</table>
+<p><b>Solución con systemd y cgroups v2</b>, en un drop-in que no modifica la unidad original:</p>
+<pre># /etc/systemd/system/ollama.service.d/limites.conf
+[Service]
+Environment="OLLAMA_MAX_LOADED_MODELS=1"   # un solo modelo en RAM
+Environment="OLLAMA_NUM_PARALLEL=1"        # una petición a la vez
+AllowedCPUs=0-2                            # cpuset: la vCPU 3 queda para kernel, sshd y GNOME
+
+$ systemctl show ollama -p AllowedCPUs   → AllowedCPUs=0-2
+$ taskset -cp &lt;PID ollama serve&gt;         → lista de afinidad actual: 0-2</pre>
+<p>Además se fijó <code>PARAMETER num_thread 3</code> en el Modelfile. Solo con <code>AllowedCPUs</code>, Ollama seguía lanzando 4 hilos (cuenta los núcleos de <code>/proc/cpuinfo</code>) sobre 3 CPU. Los hilos de ggml esperan en barreras con espera activa, así que esa sobresuscripción hundía el rendimiento: el procesamiento del prompt bajó a 5,6 tokens/s con el proceso al 283 % de CPU. Con 3 hilos en 3 CPU la VM ya no se congeló en el resto del taller. <span class="ev">(s04_diagnostico_congelamiento.txt, s04_override_systemd.txt)</span></p>
+<p>Solución de fondo, no aplicada porque afecta a todo el equipo: desactivar el hipervisor de Windows (<code>bcdedit /set hypervisorlaunchtype off</code> y "Integridad de memoria") para que VirtualBox use VT-x directo. Deja de funcionar WSL2 mientras esté desactivado.</p>
+
+<h2>4. Ejercicios prácticos (sección 07)</h2>
+
+<h3>Ejercicio 2: gestión de paquetes</h3>
+<p><code>apt update</code> solo descarga el <b>índice</b> de paquetes (qué versiones existen en los repositorios); no cambia nada instalado. <code>apt upgrade</code> <b>instala</b> las versiones nuevas de los paquetes ya instalados según ese índice. Por eso siempre va primero <code>update</code>. <code>apt policy htop curl git</code> confirmó los tres paquetes instalados, con la versión instalada igual a la candidata. <span class="ev">(e02_paquetes.txt)</span></p>
+
+<h3>Ejercicio 3: procesos antes, durante y después de la IA</h3>
+<table>
+  <tr><th>Momento</th><th>RAM usada</th><th>RAM disponible</th><th>Proceso principal</th><th>CPU</th></tr>
+  <tr><td>Antes (reposo)</td><td class="n">1,0 GiB</td><td class="n">4,7 GiB</td><td>gnome-shell</td><td>96 % inactiva</td></tr>
+  <tr><td>Durante la inferencia</td><td class="n">3,5 GiB</td><td class="n">2,3 GiB</td><td><code>llama-server</code> (usuario ollama), RSS 2,5 GB, 41,8 % MEM</td><td>188 % en <code>ps</code>, 37 % inactiva</td></tr>
+  <tr><td>Después (modelo aún cargado)</td><td class="n">3,5 GiB</td><td class="n">2,3 GiB</td><td>llama-server sigue en RAM</td><td>baja</td></tr>
+  <tr><td>Tras <code>ollama stop</code></td><td class="n">1,1 GiB</td><td class="n">4,7 GiB</td><td colspan="2"><code>ollama ps</code> vacío: se vuelve al nivel de reposo</td></tr>
+</table>
+<p>El proceso que consume los recursos no es <code>ollama serve</code> (unos 36 MB) sino su hijo <code>llama-server</code>, que carga el archivo del modelo. Tras responder, el modelo queda en RAM 5 minutos (<code>keep_alive</code>) para que la siguiente consulta no pague la carga. Que la CPU nunca llegue al 100 % global se debe al cpuset: una de las cuatro vCPU queda libre. <span class="ev">(e03_procesos.txt)</span></p>
+<figure><img src="capturas/cap_05_htop_inferencia.png" alt="htop durante la inferencia"><figcaption>Captura 2. Arriba, el echo con los integrantes y <code>ollama ps</code>; abajo, htop durante una inferencia: CPU 0, 1 y 2 al 100 % y CPU 3 al 0,8 %, efecto directo de <code>AllowedCPUs=0-2</code>. Los hilos de <code>llama-server</code> ocupan 2,8 GB (48,3 % de la RAM).</figcaption></figure>
+
+<h3>Ejercicio 4: administración del servicio</h3>
+<pre>$ sudo systemctl stop ollama
+$ systemctl is-active ollama        → inactive
+$ curl http://127.0.0.1:11434/api/tags
+curl: (7) Failed to connect to 127.0.0.1 port 11434 after 0 ms: Couldn't connect to server
+$ sudo systemctl start ollama
+$ systemctl is-active ollama        → active   (la API vuelve a responder)</pre>
+<p>systemd es el proceso 1 del sistema: arranca los servicios en el boot (<code>enabled</code>), los supervisa (<code>Restart=always</code>, <code>RestartUSec=3s</code>), agrupa todos sus procesos en un cgroup (<code>/system.slice/ollama.service</code>) y centraliza sus logs en el journal. <span class="ev">(e04_servicio.txt)</span></p>
+
+<h3>Ejercicio 5: procesos, señales y servicios</h3>
+<p><code>pgrep -a ollama</code> → <code>3681 /usr/local/bin/ollama serve</code>. Con <code>ps -fp</code>: dueño <code>ollama</code>, <b>PPID 1</b> (su padre es systemd), estado <code>Ssl</code> (durmiendo, líder de sesión, multihilo) y 10 hilos.</p>
+<ul>
+  <li><b>SIGTERM (15)</b> le pide al proceso que termine: puede capturarla, cerrar conexiones y liberar recursos. Es la señal que usa systemd (<code>KillSignal=15</code>).</li>
+  <li><b>SIGKILL (9)</b> la aplica el kernel sin avisar al proceso, que no puede capturarla ni limpiar. Puede dejar archivos a medio escribir; de hecho vimos manifiestos corruptos tras apagar la VM a la fuerza.</li>
+  <li>Hay que controlar el servicio con <code>systemctl</code> porque systemd lo supervisa: con <code>Restart=always</code>, un <code>kill</code> manual solo provoca que lo reinicie a los 3 s. Además <code>KillMode=control-group</code> detiene también a los hijos (<code>llama-server</code>), cosa que un <code>kill</code> al PID principal no hace. <span class="ev">(e05_senales.txt)</span></li>
+</ul>
+
+<h3>Ejercicio 6: red y puerto</h3>
+<pre>$ sudo ss -lntp | grep 11434
+LISTEN 0  4096  127.0.0.1:11434  0.0.0.0:*  users:(("ollama",pid=3681,fd=3))
+$ curl -m 3 http://10.0.2.15:11434/api/tags      # IP de la interfaz enp0s3
+curl: (7) Failed to connect to 10.0.2.15 port 11434 after 0 ms: Couldn't connect to server</pre>
+<p>Ollama escucha solo en <b>127.0.0.1</b> (loopback): únicamente los procesos de la misma VM pueden conectarse, y ni siquiera la IP propia de la VM responde. Si escuchara en <code>0.0.0.0</code> (<code>OLLAMA_HOST=0.0.0.0</code>), cualquier equipo que alcance esa interfaz podría usar el modelo sin autenticación: la API no tiene usuarios ni tokens. Por eso no se abrió ese puerto en el NAT. <span class="ev">(e06_red.txt)</span></p>
+
+<h3>Ejercicio 7: almacenamiento de modelos</h3>
+<table>
+  <tr><th>Modelo</th><th class="n">Tamaño</th><th>Disco antes → después</th><th class="n">Descarga</th></tr>
+  <tr><td>gemma3:1b</td><td class="n">815 MB</td><td>15 G (39 %) → 16 G (41 %)</td><td class="n">169 s</td></tr>
+  <tr><td>llama3.2:3b</td><td class="n">2,0 GB</td><td>16 G (41 %) → 18 G (46 %)</td><td class="n">432 s</td></tr>
+  <tr><td>qwen2.5:1.5b</td><td class="n">986 MB</td><td>17 G (46 %) → 18 G (48 %)</td><td class="n">63 s</td></tr>
+</table>
+<p>Los modelos viven en <code>/usr/share/ollama/.ollama/models</code> (home del usuario de sistema <code>ollama</code>; el usuario normal recibe <i>Permiso denegado</i>), separados en <code>blobs/</code> (archivos por hash sha256) y <code>manifests/</code>. En total ocupan 3,6 GB. <code>asistente-ciberseguridad</code> aparece con 2,0 GB en <code>ollama list</code> pero no ocupa espacio extra, porque reutiliza el mismo blob de pesos de llama3.2:3b. Se intentó también qwen2.5:7b (4,7 GB): la descarga quedó interrumpida por los congelamientos y dejó ~2 GB en archivos <code>*-partial</code>, que se borraron (el disco pasó de 19 G a 17 G). No se reintentó porque con 6 GB de RAM un modelo de 7B (~5,5 GB cargado) no es viable en esta VM. <span class="ev">(e07_almacenamiento.txt, e07_continuacion.txt)</span></p>
+
+<h3>Ejercicio 8: rendimiento y selección del modelo</h3>
+<p>Misma consulta a los tres modelos por la API (<code>temperature 0.2</code>, <code>seed 42</code>, <code>num_thread 3</code>), descargando cada modelo de la RAM antes del siguiente: <i>"Explica en máximo 120 palabras qué es un proceso en un sistema operativo y en qué se diferencia de un hilo. Da un ejemplo."</i></p>
+<table>
+  <tr><th>Modelo</th><th class="n">Disco</th><th class="n">RAM (RSS runner)</th><th class="n">Carga</th><th class="n">Tiempo total</th><th class="n">Tokens</th><th class="n">Velocidad</th><th>Calidad percibida</th></tr>
+  <tr><td>gemma3:1b</td><td class="n">815 MB</td><td class="n">900 MB</td><td class="n">6,6 s</td><td class="n">39,0 s</td><td class="n">192</td><td class="n">6,4 tok/s</td><td>La mejor de las tres en esta pregunta: define ambos conceptos, marca la diferencia y da un ejemplo (navegador).</td></tr>
+  <tr><td>qwen2.5:1.5b</td><td class="n">986 MB</td><td class="n">1 131 MB</td><td class="n">4,0 s</td><td class="n">32,0 s</td><td class="n">168</td><td class="n">7,1 tok/s</td><td>Correcta pero plana; el ejemplo es débil.</td></tr>
+  <tr><td>llama3.2:3b</td><td class="n">2,0 GB</td><td class="n">2 470 MB</td><td class="n">18,8 s</td><td class="n">62,3 s</td><td class="n">146</td><td class="n">3,9 tok/s</td><td>Tiene un error conceptual ("un proceso se ejecuta en el núcleo"); buen ejemplo (editor con hilos).</td></tr>
+</table>
+<p><b>Variabilidad:</b> como se fijó <code>seed 42</code>, las respuestas salieron idénticas palabra por palabra en todas las corridas, pero la velocidad no. El 24 de septiembre la misma prueba dio 7,8 / 5,8 / 3,2 tok/s en una primera corrida y 22,6 / 24,4 / 11,6 tok/s en la segunda, minutos después. La corrida de la tabla (7 de octubre) quedó en el rango lento. En modo NEM el rendimiento depende mucho de lo que esté haciendo el anfitrión, así que se guardaron las tres corridas. Lo que sí se mantiene en todas es el orden: los modelos de 1–1,5B son entre 1,6 y 2 veces más rápidos que el de 3B. <span class="ev">(e08_rendimiento.txt, e08_rendimiento_24sep_corrida1.txt, e08_rendimiento_24sep_corrida2.txt, e08_resultados*.json)</span></p>
+<p><b>Decisión:</b> los tres funcionan en esta VM. Los de 1–1,5B son los más eficientes (casi el doble de rápidos y ~1 GB de RAM). Para el asistente se eligió <b>llama3.2:3b</b> porque, en las pruebas con el prompt de sistema de 4 pasos (sección 5), siguió la estructura de forma consistente en español, y 2,5 GB de RAM caben con margen en 6 GB. La contraparte: es casi la mitad de rápido, y en esta pregunta concreta gemma3:1b respondió mejor. Una sola pregunta no alcanza para decidir calidad; el siguiente paso sería repetir el Modelfile con <code>FROM gemma3:1b</code> y comparar con varias preguntas.</p>
+
+<h3>Ejercicio 9: automatización con Bash</h3>
+<p>El script de la guía tiene un detalle con Ubuntu en español: <code>lscpu | grep "Model name"</code> no imprime nada, porque <code>lscpu</code> traduce la etiqueta a <i>"Nombre del modelo"</i>. Se corrigió con <code>LC_ALL=C lscpu | grep "Model name"</code>, que fuerza el idioma solo para ese comando. Se asignó permiso con <code>chmod +x</code> y la salida se guardó con <code>./reporte_sistema.sh | tee reporte.txt</code>. <span class="ev">(e09_bash.txt, codigo/reporte_sistema.sh, codigo/reporte.txt)</span></p>
+
+<h3>Ejercicio 10: la IA como apoyo, no como administrador</h3>
+<p>Se enviaron al modelo <code>free -h</code>, <code>df -h /</code>, las primeras líneas de <code>systemctl status ollama</code> y <code>ps aux --sort=-%mem | head -6</code> (sin datos sensibles) y luego se contrastó cada afirmación con los comandos:</p>
+<table>
+  <tr><th>Afirmación de la IA</th><th>Verificación en Ubuntu</th><th>Resultado</th></tr>
+  <tr><td>"Hay 2,3 GiB disponibles; la memoria compartida y el caché también contribuyen a la disponible"</td><td>El 2,3 GiB está bien leído. Lo del caché es cierto a medias: <i>disponible</i> ya incluye la caché que el kernel puede liberar, no hay que sumarla aparte</td><td>Parcial</td></tr>
+  <tr><td>"Hay 21 GiB de espacio libre; el disco no es un riesgo"</td><td><code>df</code>: 20 G libres (49 % usado). El 21 sale de restar 40 − 19, pero <code>df</code> no da esa cuenta por los bloques reservados. La conclusión sí es correcta</td><td>Parcial</td></tr>
+  <tr><td>"El proceso principal de ollama usa 3,8 GiB de memoria y un uso de CPU de 1h 2min"</td><td>Los 3,8 G son del cgroup completo (incluye la caché del archivo del modelo), no del proceso principal, que ocupa unos 36 MB. Y "1h 2min" es tiempo acumulado de CPU, no un porcentaje de uso</td><td>Incorrecto</td></tr>
+  <tr><td>Lista "Ollama (PID 7277)" y "Llama-server (PID 7277)" como dos procesos distintos</td><td>Es uno solo: <code>llama-server</code>, hijo de <code>ollama serve</code>. El modelo duplicó la fila</td><td>Incorrecto</td></tr>
+  <tr><td>"El servicio está sano y no consume demasiada memoria"</td><td>Sano sí (<code>active</code>, <code>NRestarts=0</code>). Pero <code>llama-server</code> usa el 42,5 % de la RAM y solo queda el 38 % disponible, así que lo de "no demasiada" no se sostiene</td><td>Parcial</td></tr>
+</table>
+<p>Conclusión: la IA lee bien los números que se le dan, pero hace cuentas propias en vez de leer el dato, confunde conceptos (memoria del cgroup vs. del proceso, tiempo de CPU vs. porcentaje) y repite procesos. En la primera prueba (24 de septiembre) pasó lo mismo: inventó una conversión a bytes y dijo que la memoria disponible no incluye la caché. Sirve para orientar, pero cada afirmación hay que comprobarla con el comando correspondiente. <span class="ev">(e10_ia_apoyo.txt)</span></p>
+
+<h2>5. Modelo personalizado con Modelfile (sección 06)</h2>
+<pre>FROM llama3.2:3b
+PARAMETER temperature 0.3
+PARAMETER num_ctx 4096
+PARAMETER num_thread 3          # agregado por el diagnóstico de la sección 3.1
+SYSTEM """ Eres un asistente académico especializado en ciberseguridad ... (4 pasos) """</pre>
+<p><code>ollama create asistente-ciberseguridad -f Modelfile</code> creó el modelo; <code>ollama show --modelfile</code> confirma los parámetros. Ante <i>"¿Qué es un ataque de fuerza bruta?"</i> respondió con las cuatro secciones pedidas (definición, funcionamiento, ejemplo y consideraciones de seguridad), pero con dos problemas. Mezcla conceptos: dice que el ataque usa "la fuerza bruta, el análisis de patrones y la exploración de vulnerabilidades", cuando la fuerza bruta consiste justamente en probar combinaciones sin explotar vulnerabilidades. Y el "ejemplo académico" es un estudio inventado, sin fuente ("se analizaron 1000 contraseñas ... después de 100 intentos, el atacante logró adivinar la contraseña"). En la primera prueba, el 24 de septiembre, también había inventado una cita ("ACM Transactions ... 2019"). Por eso hay que validar lo que responde. <span class="ev">(s06_modelfile.txt)</span></p>
+<h3>Experimento de temperatura</h3>
+<p>Tres variantes (<code>asistente-temp01/07/10</code>) y la misma pregunta dos veces cada una: <i>"¿Qué es un firewall? Máximo 90 palabras."</i></p>
+<table>
+  <tr><th class="n">temperature</th><th class="n">Similitud corrida 1 vs 2</th><th class="n">Palabras</th><th>Observación</th></tr>
+  <tr><td class="n">0.1</td><td class="n">50 %</td><td class="n">106 / 111</td><td>Misma estructura y casi las mismas frases ("capa de seguridad", "controlador de acceso")</td></tr>
+  <tr><td class="n">0.7</td><td class="n">32 %</td><td class="n">104 / 112</td><td>Estructura estable; cambian la definición y el ejemplo (malware en una, VPN en la otra)</td></tr>
+  <tr><td class="n">1.0</td><td class="n">29 %</td><td class="n">106 / 95</td><td>La más variable y la menos precisa: da como ejemplo "la interfaz de usuario de Windows Defender" y escribe "tablas de acceso control"</td></tr>
+</table>
+<p>La temperatura escala la distribución de probabilidad de la siguiente palabra: más baja concentra la elección en las más probables y más alta reparte la probabilidad. Esta vez la similitud bajó en orden (50 %, 32 %, 29 %). Aun así 0.1 no fue determinista, porque no se fijó <code>seed</code> y el muestreo sigue siendo aleatorio. En la primera prueba (24 de septiembre) salió 40 %, 49 % y 24 %, o sea que con dos corridas por valor la diferencia entre 0.1 y 0.7 no es concluyente: habría que fijar la semilla o hacer más repeticiones. Para un asistente técnico conviene una temperatura baja (0.1–0.3). <span class="ev">(s06_experimento_temperatura.txt)</span></p>
+
+<h2>6. API REST (sección 08)</h2>
+<table>
+  <tr><th>Llamada</th><th class="n">Tiempo</th><th class="n">Tokens</th><th class="n">Velocidad</th><th>Nota</th></tr>
+  <tr><td><code>/api/generate</code> "¿Qué es ciberseguridad?"</td><td class="n">106,2 s</td><td class="n">238</td><td class="n">3,1 tok/s</td><td>incluye 14,4 s de carga del modelo</td></tr>
+  <tr><td><code>/api/chat</code> "¿Qué es un firewall?"</td><td class="n">71,2 s</td><td class="n">220</td><td class="n">3,2 tok/s</td><td>modelo ya en RAM: carga 0,2 s</td></tr>
+  <tr><td><code>/api/chat</code> segundo turno con historial</td><td class="n">58,8 s</td><td class="n">155</td><td class="n">—</td><td>prompt_tokens = 368: crece porque se reenvía toda la conversación</td></tr>
+</table>
+<p>La API no tiene estado: el "historial" consiste en que el cliente reenvíe los mensajes anteriores en <code>messages</code>. Por eso cada turno procesa más tokens de entrada. El ejemplo de PowerShell de la guía es sintaxis del anfitrión Windows, y desde allí no se alcanza el puerto (loopback de la VM, ejercicio 6); se dejó así a propósito. <span class="ev">(s08_api.txt)</span></p>
+
+<h2>7. Interfaz HTML + JavaScript: AsistenteIA-VM (secciones 09 y 13)</h2>
+<p><code>index.html</code> se sirve con <code>servir.sh</code> (<code>python3 -m http.server 8080 --bind 127.0.0.1</code>), no con <code>file://</code>. Así el origen es <code>http://localhost:8080</code>, que Ollama acepta por defecto, y no hubo que tocar CORS. Funciones:</p>
+<ul>
+  <li>Historial con <code>/api/chat</code> y prompt de sistema de ciberseguridad; botón "Nueva conversación".</li>
+  <li>Selector de modelo cargado desde <code>/api/tags</code> e indicador de estado de Ollama.</li>
+  <li>Métricas por respuesta: segundos, tokens, tokens/s y mensajes en el historial.</li>
+  <li><b>Streaming</b> (NDJSON) con límite por inactividad de 90 s y mensajes de error claros.</li>
+</ul>
+<figure><img src="capturas/cap_04_app_error_timeout.png" alt="Error de tiempo agotado en la app"><figcaption>Captura 3. Primera versión (sin streaming, límite total de 5 min). Con Firefox abierto la VM generaba a solo 2,3 tok/s y la respuesta pasaba de 560 tokens, así que se agotó el tiempo. El manejo de errores funcionó, pero el usuario no veía nada durante 5 minutos. Por eso se pasó a streaming.</figcaption></figure>
+<figure><img src="capturas/cap_03_app_historial.png" alt="Conversación con historial en la app"><figcaption>Captura 4. Versión final con streaming. El segundo turno ("Y qué comando exacto uso para contar esos intentos fallidos por IP") depende del primero, y el modelo lo entendió gracias al historial. Métricas: 172 s / 438 tokens / 2,7 tok/s en el primer turno; 120 s / 338 tokens / 3,1 tok/s en el segundo, con 4 mensajes en el historial.</figcaption></figure>
+<p><b>Validación de esa respuesta:</b> el comando sugerido (<code>grep -c 'Invalid user' /var/log/authlog | awk ... | sort -u</code>) <span>es incorrecto</span>. El archivo es <code>/var/log/auth.log</code>, no <code>authlog</code> (<code>ls</code>: <i>No existe el archivo</i>), y <code>grep -c</code> devuelve un único total, así que no se puede agrupar por IP. El comando correcto:</p>
+<pre>sudo journalctl -u ssh | grep -E "Failed password|Invalid user" | grep -oE "from [0-9.]+" | sort | uniq -c | sort -rn</pre>
+<p>En este laboratorio no devolvió nada: no hubo intentos fallidos, porque todos los accesos fueron con llave. <span class="ev">(p_validacion_app.txt)</span></p>
+
+<h2>8. Reto: IA + análisis de red (secciones 10 y 12)</h2>
+<p><b>Captura autorizada:</b> solo el tráfico SSH entre nuestro anfitrión y nuestra VM. Usamos <code>sudo tshark -i enp0s3 -f 'tcp port 22' -a duration:25</code> (Wireshark en línea de comandos) mientras abríamos sesiones SSH desde Windows. El archivo es <code>evidencias/captura_ssh.pcapng</code> y se puede abrir en Wireshark.</p>
+<p><b>Metadatos extraídos:</b> 1 338 paquetes, 802 360 bytes, 22,5 s. Con <code>-z conv,tcp</code> se ven <b>seis</b> conexiones TCP distintas desde <code>10.0.2.2</code> (el NAT de VirtualBox, que representa al anfitrión) hacia <code>10.0.2.15:22</code>: una sesión de 7,7 s, una transferencia de 690 kB en 2,2 s (copia de archivos de evidencia con <code>scp</code>) y cuatro conexiones cortas de 1,2 a 1,7 s (comandos sueltos por SSH). Cada conexión repite el intercambio de banners: cliente <code>SSH-2.0-OpenSSH_10.3</code> y servidor <code>SSH-2.0-OpenSSH_9.6p1 Ubuntu-3ubuntu13.19</code>. Mensajes de negociación: 20 (KEXINIT), 30/31 (intercambio de claves) y 21 (NEWKEYS). El cliente ofrece primero <code>mlkem768x25519-sha256</code> y el servidor <code>sntrup761x25519-sha512</code>, ambos algoritmos híbridos postcuánticos.</p>
+<table>
+  <tr><th>Lo que dijo el modelo</th><th>Validación con tshark</th><th>Resultado</th></tr>
+  <tr><td>Observable: SSH, puerto 22, IPs de origen y destino, 1 338 paquetes y 802 360 bytes</td><td>Coincide con <code>capinfos</code></td><td>Correcto</td></tr>
+  <tr><td>Habla de "la conexión", en singular</td><td><code>conv,tcp</code> muestra seis conexiones, y una sola (el <code>scp</code>) tiene el 86 % de los bytes</td><td>Omisión</td></tr>
+  <tr><td>"Los banners permiten inferir una versión específica de OpenSSH en la máquina Ubuntu"</td><td>Solo <code>OpenSSH_9.6p1 Ubuntu</code> es de la VM. <code>OpenSSH_10.3</code> es el cliente de Windows, y el modelo no los separa</td><td>Parcial</td></tr>
+  <tr><td>"El contenido no se puede leer sin la contraseña o la clave privada"</td><td>Falso: el cifrado usa claves de sesión que salen del intercambio de claves (mensajes 30/31). Aunque alguien tuviera la clave privada, no podría descifrar esta captura. Además, aquí no hubo contraseña: el acceso fue con llave</td><td>Incorrecto</td></tr>
+  <tr><td>"El puerto 22 abierto podría indicar que la máquina no tiene configuración de seguridad adecuada"</td><td>No se deduce de la captura. El puerto solo está reenviado a 127.0.0.1 del anfitrión</td><td>Inferencia sin base</td></tr>
+  <tr><td>No menciona el intercambio de claves ni los algoritmos postcuánticos</td><td>Se ven en <code>ssh.message_code</code> y <code>ssh.kex_algorithms</code></td><td>Omisión</td></tr>
+</table>
+<p>El modelo organiza bien la respuesta en observable / inferible / protegido, pero se equivoca justo en la parte de seguridad (cómo se cifra SSH) y no ve detalles que solo aparecen volviendo a la captura. En la primera prueba (24 de septiembre, con 2 conexiones) cometió el mismo tipo de error: atribuyó la versión del cliente de Windows a Ubuntu. <span class="ev">(s12_reto_red.txt)</span></p>
+
+<h2>9. Seguridad y operación (sección 11)</h2>
+<table>
+  <tr><th>Control</th><th>Estado</th></tr>
+  <tr><td>El modelo se ejecuta en un equipo controlado</td><td>VM propia, red NAT, snapshots</td></tr>
+  <tr><td>No se exponen credenciales o secretos</td><td>Solo datos del sistema y metadatos de red; acceso SSH con llave</td></tr>
+  <tr><td>Las capturas de red fueron autorizadas</td><td>Solo tráfico propio anfitrión ↔ VM</td></tr>
+  <tr><td>Se validaron las respuestas de la IA</td><td>Ejercicio 10, sección 7 y reto: se encontraron errores en los tres</td></tr>
+  <tr><td>Se documentó el origen de los datos</td><td>Cada evidencia muestra sus comandos y empieza con el echo de los integrantes, la fecha y el equipo</td></tr>
+  <tr><td>Se evaluó el riesgo de exposición de la API</td><td>11434 y 8080 solo en 127.0.0.1; sin reenvío NAT; sin <code>OLLAMA_HOST=0.0.0.0</code></td></tr>
+</table>
+<p><b>Limitaciones:</b> sin GPU; rendimiento variable por el modo NEM; modelos de 7B no viables con 6 GB; la API de Ollama no tiene autenticación, así que para uso real habría que poner un backend con control de acceso delante. <code>OLLAMA_MAX_LOADED_MODELS=1</code> hace que cambiar de modelo cueste la recarga.</p>
+
+<h2>10. Conclusiones</h2>
+<ol>
+  <li>La IA local funcionó como una carga de trabajo real que puso a prueba a Ubuntu en los cinco recursos: CPU (3 vCPU al 100 %), memoria (de ~1 GB a 3,5 GB con un modelo de 3B), disco (3,6 GB de modelos), red (API en loopback) y servicios (systemd).</li>
+  <li>El hallazgo más importante no estaba en la guía: la VM se congelaba por la combinación de VirtualBox sobre Hyper-V (NEM) con una carga AVX en todas las vCPU, agravada por sobreasignar RAM. Se resolvió con herramientas del propio sistema operativo (cgroups vía <code>AllowedCPUs</code>, límites de Ollama en un drop-in de systemd y <code>num_thread</code>), midiendo el efecto de cada cambio.</li>
+  <li>Los modelos de 1–1,5B ocupan ~1 GB de RAM y son casi el doble de rápidos que el de 3B (2,5 GB). La velocidad absoluta varió mucho entre días (de 4 a 24 tok/s según el modelo y la carga del anfitrión), pero ese orden se mantuvo en todas las corridas. En una VM sin GPU, el tamaño del modelo pesa más que cualquier otro factor.</li>
+  <li>En todas las pruebas de validación el modelo cometió errores que suenan creíbles: ejemplos y citas inventados, un comando que no funciona, cuentas propias en vez de leer el dato, una explicación equivocada de cómo se cifra SSH y atribuciones de versión erradas. Es útil para explicar y organizar, no para administrar sin verificar.</li>
+</ol>
+
+<h2>Anexo: estructura de la entrega</h2>
+<pre>Taller_Ollama_Entrega/
+├── Informe_Taller_Ollama_VM.pdf / .html
+├── codigo/
+│   ├── AsistenteIA-VM/  index.html · Modelfile · servir.sh · README.md
+│   ├── reporte_sistema.sh (corregido) · reporte_sistema_original.sh · reporte.txt
+│   ├── scripts/         e01…e10, s02…s12, bench.py, temperaturas.py (uno por evidencia), cap01/cap05 (capturas)
+│   └── lib.sh · correr.sh · fase2.sh · rehacer.sh   (ejecución en orden de los scripts)
+├── evidencias/          salida de cada ejercicio (.txt), resultados (.json), captura_ssh.pcapng
+└── capturas/            capturas reales de la VM (.png)</pre>
+
+</main>
+</body>
+</html>
